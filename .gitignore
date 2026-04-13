@@ -1,0 +1,27 @@
+# Data (too large for git)
+data/raw/*.csv
+data/raw/*.jsonl
+data/processed/*.csv
+data/processed/*.jsonl
+
+# Model checkpoints
+models/
+*.pt
+*.bin
+*.safetensors
+
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# API keys
+.env
