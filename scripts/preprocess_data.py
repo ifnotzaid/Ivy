@@ -43,7 +43,7 @@ def load_gemini_data(lang: str) -> list[dict]:
 
     records = []
     bad_lines = 0
-    with open(raw_file) as f:
+    with open(raw_file, encoding="utf-8") as f:
         for line_num, line in enumerate(f, 1):
             line = line.strip()
             if not line:
