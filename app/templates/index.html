@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StyleTranslator</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+    --bg: #050507;
+    --surface: #0c0c10;
+    --card: #111116;
+    --card-hover: #16161d;
+    --border: #1e1e26;
+    --border-lit: #2a2a36;
+    --text: #eeeef0;
+    --text-2: #9898a4;
+    --text-3: #5a5a6a;
+    --accent: #34d399;
+    --accent-glow: rgba(52, 211, 153, 0.08);
+    --formal: #a78bfa;
+    --formal-bg: rgba(167, 139, 250, 0.06);
+    --casual: #fb923c;
+    --casual-bg: rgba(251, 146, 60, 0.06);
+    --neutral: #64748b;
+    --neutral-bg: rgba(100, 116, 139, 0.06);
+    --font: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --r: 14px;
+    --r-sm: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Ambient glow */
+.glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.04;
+    pointer-events: none;
+    transition: all 2s ease;
+}
+.glow-1 { top: -200px; left: -100px; background: var(--accent); }
+.glow-2 { bottom: -300px; right: -200px; background: var(--formal); }
+
+.container {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    position: relative;
+}
+
+/* ── Header ─────────────────────────── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), #059669);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #050507;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.logo-text span { color: var(--accent); }
+
+.mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.mode-tab {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-tab:hover { color: var(--text-2); }
+.mode-tab.active { background: var(--card); color: var(--text); }
+
+/* ── Language bar ─────────────────── */
+.lang-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.lang-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    outline: none;
+}
+
+.lang-chip:hover { border-color: var(--border-lit); }
+.lang-chip:focus { border-color: var(--accent); }
+
+.swap-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.swap-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: rotate(180deg);
+}
+
+.style-chips {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.style-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: var(--text-3);
+}
+
+.style-chip:hover { color: var(--text-2); border-color: var(--border-lit); }
+.style-chip.active[data-style="formal"] { background: var(--formal-bg); border-color: var(--formal); color: var(--formal); }
+.style-chip.active[data-style="casual"] { background: var(--casual-bg); border-color: var(--casual); color: var(--casual); }
+.style-chip.active[data-style="neutral"] { background: var(--neutral-bg); border-color: var(--neutral); color: var(--neutral); }
+
+/* ── Translator panels ────────────── */
+.translator {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.panel {
+    background: var(--card);
+    padding: 24px;
+    min-height: 200px;
+    position: relative;
+}
+
+.panel-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    min-height: 140px;
+}
+
+.panel-input::placeholder { color: var(--text-3); }
+
+.panel-output {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.6;
+    min-height: 140px;
+    color: var(--text);
+}
+
+.panel-output.empty { color: var(--text-3); }
+
+.panel-output .word {
+    display: inline;
+    padding: 1px 2px;
+    margin: 0 -2px;
+    border-radius: 4px;
+    cursor: default;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.panel-output .word:hover {
+    background: var(--accent-glow);
+    color: var(--accent);
+}
+
+.panel-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.char-count {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text-3);
+}
+
+.detected-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-3);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.detected-badge.visible { opacity: 1; }
+
+.detected-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.clear-btn {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.clear-btn:hover { color: var(--text); background: var(--card-hover); }
+
+.typing-indicator {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.typing-indicator.visible { opacity: 1; }
+
+.typing-indicator .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: typeBounce 1.2s infinite;
+}
+
+.typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typeBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Compare mode ─────────────────── */
+.compare-view {
+    display: none;
+}
+
+.compare-view.visible { display: block; }
+
+.compare-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.compare-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    transition: all 0.25s;
+}
+
+.compare-card:hover { border-color: var(--border-lit); }
+
+.compare-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+
+.compare-card[data-style="formal"] .compare-tag { background: var(--formal-bg); color: var(--formal); }
+.compare-card[data-style="casual"] .compare-tag { background: var(--casual-bg); color: var(--casual); }
+.compare-card[data-style="neutral"] .compare-tag { background: var(--neutral-bg); color: var(--neutral); }
+
+.compare-text {
+    font-size: 16px;
+    line-height: 1.7;
+    font-weight: 400;
+}
+
+/* ── Tone analysis ────────────────── */
+.analysis-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.analysis-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+}
+
+.analysis-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-3);
+    margin-bottom: 16px;
+}
+
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.bar-label {
+    font-size: 12px;
+    color: var(--text-2);
+    min-width: 60px;
+    font-weight: 500;
+}
+
+.bar-track {
+    flex: 1;
+    height: 5px;
+    background: var(--surface);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bar-pct {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text-3);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* ── Loading state ────────────────── */
+.translating-shimmer {
+    background: linear-gradient(90deg, var(--card) 25%, var(--card-hover) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+    height: 24px;
+    width: 70%;
+    margin-bottom: 8px;
+}
+
+.translating-shimmer:nth-child(2) { width: 50%; }
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Footer ───────────────────────── */
+.footer {
+    text-align: center;
+    padding: 40px 0 20px;
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.5px;
+}
+
+/* ── Responsive ───────────────────── */
+@media (max-width: 768px) {
+    .translator { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .analysis-row { grid-template-columns: 1fr; }
+    .lang-bar { flex-wrap: wrap; }
+    .style-chips { margin-left: 0; margin-top: 8px; width: 100%; }
+    .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">ST</div>
+            <div class="logo-text">Style<span>Translator</span></div>
+        </div>
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="translate" onclick="setMode('translate')">Translate</button>
+            <button class="mode-tab" data-mode="compare" onclick="setMode('compare')">Compare</button>
+        </div>
+    </div>
+
+    <!-- Language bar -->
+    <div class="lang-bar">
+        <select class="lang-chip" id="srcLang">
+            <option value="en">English</option>
+            <option value="tr">Turkish</option>
+            <option value="ru">Russian</option>
+            <option value="de">German</option>
+        </select>
+
+        <button class="swap-btn" onclick="swapLangs()" title="Swap">&#8646;</button>
+
+        <select class="lang-chip" id="tgtLang">
+            <option value="tr">Turkish</option>
+            <option value="en">English</option>
+            <option value="ru">Russian</option>
+            <option value="de">German</option>
+        </select>
+
+        <div class="style-chips" id="styleChips">
+            <button class="style-chip active" data-style="formal" onclick="setStyle(this)">Formal</button>
+            <button class="style-chip" data-style="casual" onclick="setStyle(this)">Casual</button>
+            <button class="style-chip" data-style="neutral" onclick="setStyle(this)">Neutral</button>
+        </div>
+    </div>
+
+    <!-- Translate mode -->
+    <div id="translateView">
+        <div class="translator">
+            <div class="panel">
+                <textarea class="panel-input" id="inputArea" placeholder="Start typing to translate..."></textarea>
+                <div class="panel-footer">
+                    <div class="detected-badge" id="detectedBadge">
+                        <div class="detected-dot" id="detectedDot"></div>
+                        <span>Detected: <strong id="detectedText">—</strong></span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span class="char-count" id="charCount">0</span>
+                        <button class="clear-btn" onclick="clearInput()" title="Clear">&#10005;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-output empty" id="outputArea">Translation appears here...</div>
+                <div class="panel-footer">
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    <span class="char-count" id="outCharCount">&nbsp;</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-row" id="analysisRow" style="display:none">
+            <div class="analysis-card">
+                <div class="analysis-title">Input tone</div>
+                <div id="inputBars"></div>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-title">Output tone</div>
+                <div id="outputBars"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compare mode -->
+    <div class="compare-view" id="compareView">
+        <div class="translator">
+            <div class="panel">
+                <textarea class="panel-input" id="compareInput" placeholder="Type text to compare across all styles..."></textarea>
+                <div class="panel-footer">
+                    <div class="detected-badge" id="compareDetected">
+                        <div class="detected-dot" id="compareDot"></div>
+                        <span>Detected: <strong id="compareDetectedText">—</strong></span>
+                    </div>
+                    <span class="char-count" id="compareCharCount">0</span>
+                </div>
+            </div>
+            <div class="panel" style="display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;color:var(--text-3);font-size:14px;" id="compareHint">
+                    Results appear below<br>as you type
+                </div>
+            </div>
+        </div>
+
+        <div class="compare-grid" id="compareGrid" style="display:none">
+            <div class="compare-card" data-style="formal">
+                <div class="compare-tag">Formal</div>
+                <div class="compare-text" id="cmpFormal">—</div>
+            </div>
+            <div class="compare-card" data-style="casual">
+                <div class="compare-tag">Casual</div>
+                <div class="compare-text" id="cmpCasual">—</div>
+            </div>
+            <div class="compare-card" data-style="neutral">
+                <div class="compare-tag">Neutral</div>
+                <div class="compare-text" id="cmpNeutral">—</div>
+            </div>
+        </div>
+
+        <div class="analysis-row" id="compareAnalysis" style="display:none">
+            <div class="analysis-card">
+                <div class="analysis-title">Input tone</div>
+                <div id="compareInputBars"></div>
+            </div>
+            <div class="analysis-card">
+                <div class="analysis-title">Style confidence</div>
+                <div style="position:relative;height:200px;">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">StyleTranslator &mdash; Capstone Project 2026</div>
+</div>
+
+<script>
+// ─── State ───────────────────────────
+let currentStyle = 'formal';
+let currentMode = 'translate';
+let translateTimer = null;
+let detectTimer = null;
+let radarChart = null;
+let isTranslating = false;
+
+// ─── DOM ─────────────────────────────
+const $ = id => document.getElementById(id);
+const inputArea = $('inputArea');
+const outputArea = $('outputArea');
+const compareInput = $('compareInput');
+
+// ─── Mode switching ──────────────────
+function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+    $('translateView').style.display = mode === 'translate' ? 'block' : 'none';
+    $('compareView').style.display = mode === 'compare' ? 'block' : 'none';
+    $('compareView').classList.toggle('visible', mode === 'compare');
+}
+
+// ─── Style selection ─────────────────
+function setStyle(el) {
+    document.querySelectorAll('.style-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentStyle = el.dataset.style;
+    // Re-translate with new style
+    if (currentMode === 'translate' && inputArea.value.trim().length > 2) {
+        scheduleTranslation();
+    }
+}
+
+// ─── Language swap ───────────────────
+function swapLangs() {
+    const s = $('srcLang'), t = $('tgtLang');
+    const tmp = s.value;
+    s.value = t.value;
+    t.value = tmp;
+    if (inputArea.value.trim().length > 2) scheduleTranslation();
+}
+
+// ─── Clear ───────────────────────────
+function clearInput() {
+    inputArea.value = '';
+    outputArea.innerHTML = 'Translation appears here...';
+    outputArea.classList.add('empty');
+    $('charCount').textContent = '0';
+    $('outCharCount').innerHTML = '&nbsp;';
+    $('detectedBadge').classList.remove('visible');
+    $('analysisRow').style.display = 'none';
+}
+
+// ─── Auto-translate on typing ────────
+inputArea.addEventListener('input', () => {
+    const len = inputArea.value.length;
+    $('charCount').textContent = len;
+
+    // Auto detect style
+    clearTimeout(detectTimer);
+    if (len > 15) {
+        detectTimer = setTimeout(() => detectStyle(inputArea.value, 'detectedBadge', 'detectedDot', 'detectedText'), 500);
+    } else {
+        $('detectedBadge').classList.remove('visible');
+    }
+
+    // Auto translate
+    if (len > 2) {
+        scheduleTranslation();
+    } else {
+        outputArea.innerHTML = 'Translation appears here...';
+        outputArea.classList.add('empty');
+        $('analysisRow').style.display = 'none';
+    }
+});
+
+// Also re-translate when language changes
+$('srcLang').addEventListener('change', () => { if (inputArea.value.trim().length > 2) scheduleTranslation(); });
+$('tgtLang').addEventListener('change', () => { if (inputArea.value.trim().length > 2) scheduleTranslation(); });
+
+function scheduleTranslation() {
+    clearTimeout(translateTimer);
+    $('typingIndicator').classList.add('visible');
+    translateTimer = setTimeout(() => doTranslate(), 800);
+}
+
+async function doTranslate() {
+    const text = inputArea.value.trim();
+    if (!text || isTranslating) return;
+
+    isTranslating = true;
+
+    try {
+        const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text,
+                source_lang: $('srcLang').value,
+                target_lang: $('tgtLang').value,
+                style: currentStyle,
+            }),
+        });
+        const data = await res.json();
+
+        // Render output with hoverable words
+        const words = data.translation.split(' ');
+        outputArea.innerHTML = words.map(w =>
+            `<span class="word">${w}</span>`
+        ).join(' ');
+        outputArea.classList.remove('empty');
+        $('outCharCount').textContent = data.translation.length;
+
+        // Tone bars
+        const inputScores = await detectStyleScores(text);
+        renderBars('inputBars', inputScores);
+        renderBars('outputBars', data.style_scores);
+        $('analysisRow').style.display = 'grid';
+
+    } catch (e) {
+        outputArea.innerHTML = '<span style="color:#ef4444">Translation failed</span>';
+        outputArea.classList.remove('empty');
+    } finally {
+        $('typingIndicator').classList.remove('visible');
+        isTranslating = false;
+    }
+}
+
+// ─── Compare mode auto-translate ─────
+compareInput.addEventListener('input', () => {
+    const len = compareInput.value.length;
+    $('compareCharCount').textContent = len;
+
+    clearTimeout(detectTimer);
+    if (len > 15) {
+        detectTimer = setTimeout(() => detectStyle(compareInput.value, 'compareDetected', 'compareDot', 'compareDetectedText'), 500);
+    }
+
+    if (len > 2) {
+        clearTimeout(translateTimer);
+        translateTimer = setTimeout(() => doCompare(), 1000);
+    } else {
+        $('compareGrid').style.display = 'none';
+        $('compareAnalysis').style.display = 'none';
+    }
+});
+
+async function doCompare() {
+    const text = compareInput.value.trim();
+    if (!text) return;
+
+    $('compareHint').textContent = 'Translating...';
+
+    try {
+        const res = await fetch('/api/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text,
+                source_lang: $('srcLang').value,
+                target_lang: $('tgtLang').value,
+            }),
+        });
+        const data = await res.json();
+
+        $('cmpFormal').textContent = data.results.formal.translation;
+        $('cmpCasual').textContent = data.results.casual.translation;
+        $('cmpNeutral').textContent = data.results.neutral.translation;
+
+        renderBars('compareInputBars', data.input_style);
+        renderRadar(data.results);
+
+        $('compareGrid').style.display = 'grid';
+        $('compareAnalysis').style.display = 'grid';
+        $('compareHint').textContent = 'Results below';
+
+    } catch (e) {
+        $('compareHint').textContent = 'Failed — try again';
+    }
+}
+
+// ─── Style detection ─────────────────
+async function detectStyle(text, badgeId, dotId, textId) {
+    try {
+        const res = await fetch('/api/detect-style', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        const colors = { formal: '#a78bfa', casual: '#fb923c', neutral: '#64748b' };
+        $(dotId).style.background = colors[data.dominant_style];
+        $(textId).textContent = data.dominant_style;
+        $(badgeId).classList.add('visible');
+    } catch (e) {}
+}
+
+async function detectStyleScores(text) {
+    try {
+        const res = await fetch('/api/detect-style', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        return data.scores;
+    } catch (e) {
+        return { formal: 0.33, casual: 0.33, neutral: 0.34 };
+    }
+}
+
+// ─── Tone bars renderer ──────────────
+function renderBars(id, scores) {
+    const defs = [
+        { key: 'formal', label: 'Formal', color: '#a78bfa' },
+        { key: 'casual', label: 'Casual', color: '#fb923c' },
+        { key: 'neutral', label: 'Neutral', color: '#64748b' },
+    ];
+    $(id).innerHTML = defs.map(d => {
+        const pct = Math.round((scores[d.key] || 0) * 100);
+        return `<div class="bar-row">
+            <span class="bar-label">${d.label}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.color}"></div></div>
+            <span class="bar-pct">${pct}%</span>
+        </div>`;
+    }).join('');
+}
+
+// ─── Radar chart ─────────────────────
+function renderRadar(results) {
+    const ctx = $('radarChart');
+    if (radarChart) radarChart.destroy();
+
+    radarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Formal', 'Casual', 'Neutral'],
+            datasets: [
+                {
+                    label: 'Formal',
+                    data: [
+                        Math.round((results.formal.style_scores.formal||0)*100),
+                        Math.round((results.formal.style_scores.casual||0)*100),
+                        Math.round((results.formal.style_scores.neutral||0)*100)
+                    ],
+                    backgroundColor: 'rgba(167,139,250,0.1)',
+                    borderColor: '#a78bfa',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#a78bfa',
+                    pointRadius: 3,
+                },
+                {
+                    label: 'Casual',
+                    data: [
+                        Math.round((results.casual.style_scores.formal||0)*100),
+                        Math.round((results.casual.style_scores.casual||0)*100),
+                        Math.round((results.casual.style_scores.neutral||0)*100)
+                    ],
+                    backgroundColor: 'rgba(251,146,60,0.1)',
+                    borderColor: '#fb923c',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fb923c',
+                    pointRadius: 3,
+                },
+                {
+                    label: 'Neutral',
+                    data: [
+                        Math.round((results.neutral.style_scores.formal||0)*100),
+                        Math.round((results.neutral.style_scores.casual||0)*100),
+                        Math.round((results.neutral.style_scores.neutral||0)*100)
+                    ],
+                    backgroundColor: 'rgba(100,116,139,0.1)',
+                    borderColor: '#64748b',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#64748b',
+                    pointRadius: 3,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { stepSize: 25, color: '#3a3a4a', backdropColor: 'transparent', font: { size: 9 } },
+                    grid: { color: '#1e1e26' },
+                    angleLines: { color: '#1e1e26' },
+                    pointLabels: { color: '#9898a4', font: { size: 12, family: 'Outfit' } },
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#9898a4', font: { size: 11, family: 'Outfit' }, usePointStyle: true, pointStyle: 'circle', padding: 14 }
+                }
+            }
+        }
+    });
+}
+
+// ─── Keyboard shortcut ───────────────
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') clearInput();
+});
+</script>
+</body>
+</html>
