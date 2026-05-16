@@ -1,14 +1,29 @@
 # Data (too large for git)
 data/raw/*.csv
 data/raw/*.jsonl
+data/raw/**/*.csv
+data/raw/**/*.jsonl
 data/processed/*.csv
 data/processed/*.jsonl
+data/processed/**/*.csv
+data/processed/**/*.jsonl
+eval/data/tatoeba/
+
+# Local runtime data
+data/*.db
+data/*.db-*
+data/*.db.*
+data/*.sqlite
+data/*.sqlite3
 
 # Model checkpoints
 models/
 *.pt
 *.bin
 *.safetensors
+
+# Generated/local outputs
+outputs/
 
 # Python
 __pycache__/

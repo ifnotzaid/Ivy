@@ -1,0 +1,30 @@
+{"src_lang":"en","tgt_lang":"tr","src":"I went to the store yesterday.","ref":"Dün mağazaya gittim.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"tr","src":"Could you please send me the report by Friday?","ref":"Raporu cuma gününe kadar bana gönderebilir misiniz?","domain":"formal","style":"formal"}
+{"src_lang":"en","tgt_lang":"tr","src":"The children played in the garden after lunch.","ref":"Çocuklar öğle yemeğinden sonra bahçede oynadı.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"tr","src":"This coffee is way too hot.","ref":"Bu kahve çok fazla sıcak.","domain":"casual","style":"casual"}
+{"src_lang":"en","tgt_lang":"tr","src":"She forgot her umbrella on the bus.","ref":"Şemsiyesini otobüste unuttu.","domain":"general","style":"neutral"}
+{"src_lang":"tr","tgt_lang":"en","src":"Dün mağazaya gittim.","ref":"I went to the store yesterday.","domain":"general","style":"neutral"}
+{"src_lang":"tr","tgt_lang":"en","src":"Raporu cuma gününe kadar bana gönderebilir misiniz?","ref":"Could you please send me the report by Friday?","domain":"formal","style":"formal"}
+{"src_lang":"tr","tgt_lang":"en","src":"Çocuklar öğle yemeğinden sonra bahçede oynadı.","ref":"The children played in the garden after lunch.","domain":"general","style":"neutral"}
+{"src_lang":"tr","tgt_lang":"en","src":"Bu kahve çok fazla sıcak.","ref":"This coffee is way too hot.","domain":"casual","style":"casual"}
+{"src_lang":"tr","tgt_lang":"en","src":"Şemsiyesini otobüste unuttu.","ref":"She forgot her umbrella on the bus.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"de","src":"I went to the store yesterday.","ref":"Ich bin gestern in den Laden gegangen.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"de","src":"Could you please close the window?","ref":"Könnten Sie bitte das Fenster schließen?","domain":"formal","style":"formal"}
+{"src_lang":"en","tgt_lang":"de","src":"The train arrived ten minutes late.","ref":"Der Zug kam zehn Minuten zu spät an.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"de","src":"That movie was really fun.","ref":"Der Film war echt lustig.","domain":"casual","style":"casual"}
+{"src_lang":"en","tgt_lang":"de","src":"She left the keys on the kitchen table.","ref":"Sie hat die Schlüssel auf dem Küchentisch liegen lassen.","domain":"general","style":"neutral"}
+{"src_lang":"de","tgt_lang":"en","src":"Ich bin gestern in den Laden gegangen.","ref":"I went to the store yesterday.","domain":"general","style":"neutral"}
+{"src_lang":"de","tgt_lang":"en","src":"Könnten Sie bitte das Fenster schließen?","ref":"Could you please close the window?","domain":"formal","style":"formal"}
+{"src_lang":"de","tgt_lang":"en","src":"Der Zug kam zehn Minuten zu spät an.","ref":"The train arrived ten minutes late.","domain":"general","style":"neutral"}
+{"src_lang":"de","tgt_lang":"en","src":"Der Film war echt lustig.","ref":"That movie was really fun.","domain":"casual","style":"casual"}
+{"src_lang":"de","tgt_lang":"en","src":"Sie hat die Schlüssel auf dem Küchentisch liegen lassen.","ref":"She left the keys on the kitchen table.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"ru","src":"I went to the store yesterday.","ref":"Вчера я ходил в магазин.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"ru","src":"Could you please repeat the question?","ref":"Не могли бы вы повторить вопрос?","domain":"formal","style":"formal"}
+{"src_lang":"en","tgt_lang":"ru","src":"The old bridge is near the station.","ref":"Старый мост находится рядом со станцией.","domain":"general","style":"neutral"}
+{"src_lang":"en","tgt_lang":"ru","src":"This soup is super tasty.","ref":"Этот суп очень вкусный.","domain":"casual","style":"casual"}
+{"src_lang":"en","tgt_lang":"ru","src":"They waited outside because the door was locked.","ref":"Они ждали снаружи, потому что дверь была заперта.","domain":"general","style":"neutral"}
+{"src_lang":"ru","tgt_lang":"en","src":"Вчера я ходил в магазин.","ref":"I went to the store yesterday.","domain":"general","style":"neutral"}
+{"src_lang":"ru","tgt_lang":"en","src":"Не могли бы вы повторить вопрос?","ref":"Could you please repeat the question?","domain":"formal","style":"formal"}
+{"src_lang":"ru","tgt_lang":"en","src":"Старый мост находится рядом со станцией.","ref":"The old bridge is near the station.","domain":"general","style":"neutral"}
+{"src_lang":"ru","tgt_lang":"en","src":"Этот суп очень вкусный.","ref":"This soup is super tasty.","domain":"casual","style":"casual"}
+{"src_lang":"ru","tgt_lang":"en","src":"Они ждали снаружи, потому что дверь была заперта.","ref":"They waited outside because the door was locked.","domain":"general","style":"neutral"}

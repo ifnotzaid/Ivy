@@ -1,0 +1,33 @@
+{"sentence":"Ayşe sabah erkenden okula gitti.","word":"Ayşe","language":"tr","expected_pos":"noun","expected_base_form":"Ayşe"}
+{"sentence":"Ayşe sabah erkenden okula gitti.","word":"sabah","language":"tr","expected_pos":"noun","expected_base_form":"sabah"}
+{"sentence":"Ayşe sabah erkenden okula gitti.","word":"erkenden","language":"tr","expected_pos":"adv","expected_base_form":"erken"}
+{"sentence":"Ayşe sabah erkenden okula gitti.","word":"okula","language":"tr","expected_pos":"noun","expected_base_form":"okul"}
+{"sentence":"Ayşe sabah erkenden okula gitti.","word":"gitti","language":"tr","expected_pos":"verb","expected_base_form":"gitmek"}
+{"sentence":"Deniz çantasına su ve elma koydu.","word":"Deniz","language":"tr","expected_pos":"noun","expected_base_form":"Deniz"}
+{"sentence":"Deniz çantasına su ve elma koydu.","word":"çantasına","language":"tr","expected_pos":"noun","expected_base_form":"çanta"}
+{"sentence":"Deniz çantasına su ve elma koydu.","word":"su","language":"tr","expected_pos":"noun","expected_base_form":"su"}
+{"sentence":"Deniz çantasına su ve elma koydu.","word":"ve","language":"tr","expected_pos":"conj","expected_base_form":"ve"}
+{"sentence":"Deniz çantasına su ve elma koydu.","word":"elma","language":"tr","expected_pos":"noun","expected_base_form":"elma"}
+{"sentence":"Deniz çantasına su ve elma koydu.","word":"koydu","language":"tr","expected_pos":"verb","expected_base_form":"koymak"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"Hava","language":"tr","expected_pos":"noun","expected_base_form":"hava"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"çok","language":"tr","expected_pos":"adv","expected_base_form":"çok"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"soğuk","language":"tr","expected_pos":"adj","expected_base_form":"soğuk"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"olduğu","language":"tr","expected_pos":"verb","expected_base_form":"olmak"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"için","language":"tr","expected_pos":"prep","expected_base_form":"için"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"kalın","language":"tr","expected_pos":"adj","expected_base_form":"kalın"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"ceketini","language":"tr","expected_pos":"noun","expected_base_form":"ceket"}
+{"sentence":"Hava çok soğuk olduğu için kalın ceketini giydi.","word":"giydi","language":"tr","expected_pos":"verb","expected_base_form":"giymek"}
+{"sentence":"Öğrenciler sessizce sınıfa girdiler.","word":"Öğrenciler","language":"tr","expected_pos":"noun","expected_base_form":"öğrenci"}
+{"sentence":"Öğrenciler sessizce sınıfa girdiler.","word":"sessizce","language":"tr","expected_pos":"adv","expected_base_form":"sessiz"}
+{"sentence":"Öğrenciler sessizce sınıfa girdiler.","word":"sınıfa","language":"tr","expected_pos":"noun","expected_base_form":"sınıf"}
+{"sentence":"Öğrenciler sessizce sınıfa girdiler.","word":"girdiler","language":"tr","expected_pos":"verb","expected_base_form":"girmek"}
+{"sentence":"Küçük kedi bahçede uyuyordu.","word":"Küçük","language":"tr","expected_pos":"adj","expected_base_form":"küçük"}
+{"sentence":"Küçük kedi bahçede uyuyordu.","word":"kedi","language":"tr","expected_pos":"noun","expected_base_form":"kedi"}
+{"sentence":"Küçük kedi bahçede uyuyordu.","word":"bahçede","language":"tr","expected_pos":"noun","expected_base_form":"bahçe"}
+{"sentence":"Küçük kedi bahçede uyuyordu.","word":"uyuyordu","language":"tr","expected_pos":"verb","expected_base_form":"uyumak"}
+{"sentence":"Arkadaşım bana uzun bir mektup yazdı.","word":"Arkadaşım","language":"tr","expected_pos":"noun","expected_base_form":"arkadaş"}
+{"sentence":"Arkadaşım bana uzun bir mektup yazdı.","word":"bana","language":"tr","expected_pos":"pron","expected_base_form":"ben"}
+{"sentence":"Arkadaşım bana uzun bir mektup yazdı.","word":"uzun","language":"tr","expected_pos":"adj","expected_base_form":"uzun"}
+{"sentence":"Arkadaşım bana uzun bir mektup yazdı.","word":"bir","language":"tr","expected_pos":"det","expected_base_form":"bir"}
+{"sentence":"Arkadaşım bana uzun bir mektup yazdı.","word":"mektup","language":"tr","expected_pos":"noun","expected_base_form":"mektup"}
+{"sentence":"Arkadaşım bana uzun bir mektup yazdı.","word":"yazdı","language":"tr","expected_pos":"verb","expected_base_form":"yazmak"}

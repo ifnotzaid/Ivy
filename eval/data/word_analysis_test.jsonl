@@ -1,0 +1,100 @@
+{"sentence": "Ayşe sabah erkenden okula gitti.", "word": "Ayşe", "language": "tr", "expected_pos": "noun", "expected_base_form": "Ayşe"}
+{"sentence": "Ayşe sabah erkenden okula gitti.", "word": "sabah", "language": "tr", "expected_pos": "noun", "expected_base_form": "sabah"}
+{"sentence": "Ayşe sabah erkenden okula gitti.", "word": "erkenden", "language": "tr", "expected_pos": "adv", "expected_base_form": "erken"}
+{"sentence": "Ayşe sabah erkenden okula gitti.", "word": "okula", "language": "tr", "expected_pos": "noun", "expected_base_form": "okul"}
+{"sentence": "Ayşe sabah erkenden okula gitti.", "word": "gitti", "language": "tr", "expected_pos": "verb", "expected_base_form": "gitmek"}
+{"sentence": "Deniz çantasına su ve elma koydu.", "word": "Deniz", "language": "tr", "expected_pos": "noun", "expected_base_form": "Deniz"}
+{"sentence": "Deniz çantasına su ve elma koydu.", "word": "çantasına", "language": "tr", "expected_pos": "noun", "expected_base_form": "çanta"}
+{"sentence": "Deniz çantasına su ve elma koydu.", "word": "su", "language": "tr", "expected_pos": "noun", "expected_base_form": "su"}
+{"sentence": "Deniz çantasına su ve elma koydu.", "word": "ve", "language": "tr", "expected_pos": "conj", "expected_base_form": "ve"}
+{"sentence": "Deniz çantasına su ve elma koydu.", "word": "elma", "language": "tr", "expected_pos": "noun", "expected_base_form": "elma"}
+{"sentence": "Deniz çantasına su ve elma koydu.", "word": "koydu", "language": "tr", "expected_pos": "verb", "expected_base_form": "koymak"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "Hava", "language": "tr", "expected_pos": "noun", "expected_base_form": "hava"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "çok", "language": "tr", "expected_pos": "adv", "expected_base_form": "çok"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "soğuk", "language": "tr", "expected_pos": "adj", "expected_base_form": "soğuk"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "olduğu", "language": "tr", "expected_pos": "verb", "expected_base_form": "olmak"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "için", "language": "tr", "expected_pos": "prep", "expected_base_form": "için"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "kalın", "language": "tr", "expected_pos": "adj", "expected_base_form": "kalın"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "ceketini", "language": "tr", "expected_pos": "noun", "expected_base_form": "ceket"}
+{"sentence": "Hava çok soğuk olduğu için kalın ceketini giydi.", "word": "giydi", "language": "tr", "expected_pos": "verb", "expected_base_form": "giymek"}
+{"sentence": "Öğrenciler sessizce sınıfa girdiler.", "word": "Öğrenciler", "language": "tr", "expected_pos": "noun", "expected_base_form": "öğrenci"}
+{"sentence": "Öğrenciler sessizce sınıfa girdiler.", "word": "sessizce", "language": "tr", "expected_pos": "adv", "expected_base_form": "sessiz"}
+{"sentence": "Öğrenciler sessizce sınıfa girdiler.", "word": "sınıfa", "language": "tr", "expected_pos": "noun", "expected_base_form": "sınıf"}
+{"sentence": "Öğrenciler sessizce sınıfa girdiler.", "word": "girdiler", "language": "tr", "expected_pos": "verb", "expected_base_form": "girmek"}
+{"sentence": "Küçük kedi bahçede uyuyordu.", "word": "Küçük", "language": "tr", "expected_pos": "adj", "expected_base_form": "küçük"}
+{"sentence": "Küçük kedi bahçede uyuyordu.", "word": "kedi", "language": "tr", "expected_pos": "noun", "expected_base_form": "kedi"}
+{"sentence": "Küçük kedi bahçede uyuyordu.", "word": "bahçede", "language": "tr", "expected_pos": "noun", "expected_base_form": "bahçe"}
+{"sentence": "Küçük kedi bahçede uyuyordu.", "word": "uyuyordu", "language": "tr", "expected_pos": "verb", "expected_base_form": "uyumak"}
+{"sentence": "Arkadaşım bana uzun bir mektup yazdı.", "word": "Arkadaşım", "language": "tr", "expected_pos": "noun", "expected_base_form": "arkadaş"}
+{"sentence": "Arkadaşım bana uzun bir mektup yazdı.", "word": "bana", "language": "tr", "expected_pos": "pron", "expected_base_form": "ben"}
+{"sentence": "Arkadaşım bana uzun bir mektup yazdı.", "word": "uzun", "language": "tr", "expected_pos": "adj", "expected_base_form": "uzun"}
+{"sentence": "Arkadaşım bana uzun bir mektup yazdı.", "word": "bir", "language": "tr", "expected_pos": "det", "expected_base_form": "bir"}
+{"sentence": "Arkadaşım bana uzun bir mektup yazdı.", "word": "mektup", "language": "tr", "expected_pos": "noun", "expected_base_form": "mektup"}
+{"sentence": "Arkadaşım bana uzun bir mektup yazdı.", "word": "yazdı", "language": "tr", "expected_pos": "verb", "expected_base_form": "yazmak"}
+{"sentence": "Annem mutfakta lezzetli çorba pişiriyor.", "word": "Annem", "language": "tr", "expected_pos": "noun", "expected_base_form": "anne"}
+{"sentence": "Annem mutfakta lezzetli çorba pişiriyor.", "word": "mutfakta", "language": "tr", "expected_pos": "noun", "expected_base_form": "mutfak"}
+{"sentence": "Annem mutfakta lezzetli çorba pişiriyor.", "word": "lezzetli", "language": "tr", "expected_pos": "adj", "expected_base_form": "lezzetli"}
+{"sentence": "Annem mutfakta lezzetli çorba pişiriyor.", "word": "çorba", "language": "tr", "expected_pos": "noun", "expected_base_form": "çorba"}
+{"sentence": "Annem mutfakta lezzetli çorba pişiriyor.", "word": "pişiriyor", "language": "tr", "expected_pos": "verb", "expected_base_form": "pişirmek"}
+{"sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.", "word": "Çocuklar", "language": "tr", "expected_pos": "noun", "expected_base_form": "çocuk"}
+{"sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.", "word": "parkta", "language": "tr", "expected_pos": "noun", "expected_base_form": "park"}
+{"sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.", "word": "hızlıca", "language": "tr", "expected_pos": "adv", "expected_base_form": "hızlı"}
+{"sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.", "word": "koşarken", "language": "tr", "expected_pos": "verb", "expected_base_form": "koşmak"}
+{"sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.", "word": "yağmur", "language": "tr", "expected_pos": "noun", "expected_base_form": "yağmur"}
+{"sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.", "word": "başladı", "language": "tr", "expected_pos": "verb", "expected_base_form": "başlamak"}
+{"sentence": "Yaşlı adam dikkatlice eski kitabı okudu.", "word": "Yaşlı", "language": "tr", "expected_pos": "adj", "expected_base_form": "yaşlı"}
+{"sentence": "Yaşlı adam dikkatlice eski kitabı okudu.", "word": "adam", "language": "tr", "expected_pos": "noun", "expected_base_form": "adam"}
+{"sentence": "Yaşlı adam dikkatlice eski kitabı okudu.", "word": "dikkatlice", "language": "tr", "expected_pos": "adv", "expected_base_form": "dikkatli"}
+{"sentence": "Yaşlı adam dikkatlice eski kitabı okudu.", "word": "eski", "language": "tr", "expected_pos": "adj", "expected_base_form": "eski"}
+{"sentence": "Yaşlı adam dikkatlice eski kitabı okudu.", "word": "kitabı", "language": "tr", "expected_pos": "noun", "expected_base_form": "kitap"}
+{"sentence": "Yaşlı adam dikkatlice eski kitabı okudu.", "word": "okudu", "language": "tr", "expected_pos": "verb", "expected_base_form": "okumak"}
+{"sentence": "Bugün toplantıya geç kaldığım için üzgünüm.", "word": "Bugün", "language": "tr", "expected_pos": "adv", "expected_base_form": "bugün"}
+{"sentence": "Bugün toplantıya geç kaldığım için üzgünüm.", "word": "toplantıya", "language": "tr", "expected_pos": "noun", "expected_base_form": "toplantı"}
+{"sentence": "Bugün toplantıya geç kaldığım için üzgünüm.", "word": "geç", "language": "tr", "expected_pos": "adv", "expected_base_form": "geç"}
+{"sentence": "Bugün toplantıya geç kaldığım için üzgünüm.", "word": "kaldığım", "language": "tr", "expected_pos": "verb", "expected_base_form": "kalmak"}
+{"sentence": "Bugün toplantıya geç kaldığım için üzgünüm.", "word": "için", "language": "tr", "expected_pos": "prep", "expected_base_form": "için"}
+{"sentence": "Bugün toplantıya geç kaldığım için üzgünüm.", "word": "üzgünüm", "language": "tr", "expected_pos": "adj", "expected_base_form": "üzgün"}
+{"sentence": "Kardeşim yeni bisikletini garajda sakladı.", "word": "Kardeşim", "language": "tr", "expected_pos": "noun", "expected_base_form": "kardeş"}
+{"sentence": "Kardeşim yeni bisikletini garajda sakladı.", "word": "yeni", "language": "tr", "expected_pos": "adj", "expected_base_form": "yeni"}
+{"sentence": "Kardeşim yeni bisikletini garajda sakladı.", "word": "bisikletini", "language": "tr", "expected_pos": "noun", "expected_base_form": "bisiklet"}
+{"sentence": "Kardeşim yeni bisikletini garajda sakladı.", "word": "garajda", "language": "tr", "expected_pos": "noun", "expected_base_form": "garaj"}
+{"sentence": "Kardeşim yeni bisikletini garajda sakladı.", "word": "sakladı", "language": "tr", "expected_pos": "verb", "expected_base_form": "saklamak"}
+{"sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.", "word": "Otobüs", "language": "tr", "expected_pos": "noun", "expected_base_form": "otobüs"}
+{"sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.", "word": "durağında", "language": "tr", "expected_pos": "noun", "expected_base_form": "durak"}
+{"sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.", "word": "sabırsızca", "language": "tr", "expected_pos": "adv", "expected_base_form": "sabırsız"}
+{"sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.", "word": "bekleyen", "language": "tr", "expected_pos": "verb", "expected_base_form": "beklemek"}
+{"sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.", "word": "kadın", "language": "tr", "expected_pos": "noun", "expected_base_form": "kadın"}
+{"sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.", "word": "gülümsedi", "language": "tr", "expected_pos": "verb", "expected_base_form": "gülümsemek"}
+{"sentence": "Bu soruyu dikkatle cevaplamanız gerekiyor.", "word": "Bu", "language": "tr", "expected_pos": "det", "expected_base_form": "bu"}
+{"sentence": "Bu soruyu dikkatle cevaplamanız gerekiyor.", "word": "soruyu", "language": "tr", "expected_pos": "noun", "expected_base_form": "soru"}
+{"sentence": "Bu soruyu dikkatle cevaplamanız gerekiyor.", "word": "dikkatle", "language": "tr", "expected_pos": "adv", "expected_base_form": "dikkat"}
+{"sentence": "Bu soruyu dikkatle cevaplamanız gerekiyor.", "word": "cevaplamanız", "language": "tr", "expected_pos": "verb", "expected_base_form": "cevaplamak"}
+{"sentence": "Bu soruyu dikkatle cevaplamanız gerekiyor.", "word": "gerekiyor", "language": "tr", "expected_pos": "verb", "expected_base_form": "gerekmek"}
+{"sentence": "Kalabalık sokakta sessizce yürüdük.", "word": "Kalabalık", "language": "tr", "expected_pos": "adj", "expected_base_form": "kalabalık"}
+{"sentence": "Kalabalık sokakta sessizce yürüdük.", "word": "sokakta", "language": "tr", "expected_pos": "noun", "expected_base_form": "sokak"}
+{"sentence": "Kalabalık sokakta sessizce yürüdük.", "word": "sessizce", "language": "tr", "expected_pos": "adv", "expected_base_form": "sessiz"}
+{"sentence": "Kalabalık sokakta sessizce yürüdük.", "word": "yürüdük", "language": "tr", "expected_pos": "verb", "expected_base_form": "yürümek"}
+{"sentence": "Misafirler salonda kahve içip sohbet ettiler.", "word": "Misafirler", "language": "tr", "expected_pos": "noun", "expected_base_form": "misafir"}
+{"sentence": "Misafirler salonda kahve içip sohbet ettiler.", "word": "salonda", "language": "tr", "expected_pos": "noun", "expected_base_form": "salon"}
+{"sentence": "Misafirler salonda kahve içip sohbet ettiler.", "word": "kahve", "language": "tr", "expected_pos": "noun", "expected_base_form": "kahve"}
+{"sentence": "Misafirler salonda kahve içip sohbet ettiler.", "word": "içip", "language": "tr", "expected_pos": "verb", "expected_base_form": "içmek"}
+{"sentence": "Misafirler salonda kahve içip sohbet ettiler.", "word": "sohbet", "language": "tr", "expected_pos": "noun", "expected_base_form": "sohbet"}
+{"sentence": "Misafirler salonda kahve içip sohbet ettiler.", "word": "ettiler", "language": "tr", "expected_pos": "verb", "expected_base_form": "etmek"}
+{"sentence": "Telefonum masada aniden titremeye başladı.", "word": "Telefonum", "language": "tr", "expected_pos": "noun", "expected_base_form": "telefon"}
+{"sentence": "Telefonum masada aniden titremeye başladı.", "word": "masada", "language": "tr", "expected_pos": "noun", "expected_base_form": "masa"}
+{"sentence": "Telefonum masada aniden titremeye başladı.", "word": "aniden", "language": "tr", "expected_pos": "adv", "expected_base_form": "aniden"}
+{"sentence": "Telefonum masada aniden titremeye başladı.", "word": "titremeye", "language": "tr", "expected_pos": "verb", "expected_base_form": "titremek"}
+{"sentence": "Telefonum masada aniden titremeye başladı.", "word": "başladı", "language": "tr", "expected_pos": "verb", "expected_base_form": "başlamak"}
+{"sentence": "Genç doktor hastayı dikkatlice muayene etti.", "word": "Genç", "language": "tr", "expected_pos": "adj", "expected_base_form": "genç"}
+{"sentence": "Genç doktor hastayı dikkatlice muayene etti.", "word": "doktor", "language": "tr", "expected_pos": "noun", "expected_base_form": "doktor"}
+{"sentence": "Genç doktor hastayı dikkatlice muayene etti.", "word": "hastayı", "language": "tr", "expected_pos": "noun", "expected_base_form": "hasta"}
+{"sentence": "Genç doktor hastayı dikkatlice muayene etti.", "word": "dikkatlice", "language": "tr", "expected_pos": "adv", "expected_base_form": "dikkatli"}
+{"sentence": "Genç doktor hastayı dikkatlice muayene etti.", "word": "muayene", "language": "tr", "expected_pos": "noun", "expected_base_form": "muayene"}
+{"sentence": "Genç doktor hastayı dikkatlice muayene etti.", "word": "etti", "language": "tr", "expected_pos": "verb", "expected_base_form": "etmek"}
+{"sentence": "Çiçekler ilkbaharda güzelce açtı.", "word": "Çiçekler", "language": "tr", "expected_pos": "noun", "expected_base_form": "çiçek"}
+{"sentence": "Çiçekler ilkbaharda güzelce açtı.", "word": "ilkbaharda", "language": "tr", "expected_pos": "noun", "expected_base_form": "ilkbahar"}
+{"sentence": "Çiçekler ilkbaharda güzelce açtı.", "word": "güzelce", "language": "tr", "expected_pos": "adv", "expected_base_form": "güzel"}
+{"sentence": "Çiçekler ilkbaharda güzelce açtı.", "word": "açtı", "language": "tr", "expected_pos": "verb", "expected_base_form": "açmak"}
+{"sentence": "Ben seni dün aradım.", "word": "Ben", "language": "tr", "expected_pos": "pron", "expected_base_form": "ben"}
+{"sentence": "Ben seni dün aradım.", "word": "seni", "language": "tr", "expected_pos": "pron", "expected_base_form": "sen"}
+{"sentence": "Ben seni dün aradım.", "word": "aradım", "language": "tr", "expected_pos": "verb", "expected_base_form": "aramak"}

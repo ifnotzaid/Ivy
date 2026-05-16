@@ -1,0 +1,455 @@
+{
+  "timestamp": "2026-05-14 23:39:38",
+  "dataset_sizes": {
+    "translation": 300,
+    "style": 432,
+    "word_analysis": 100
+  },
+  "translation": {
+    "en->tr": {
+      "n": 50,
+      "baseline_bleu": 44.85,
+      "baseline_chrf": 69.37,
+      "pipeline_bleu": 44.85,
+      "pipeline_chrf": 69.37,
+      "delta_bleu": 0.0,
+      "delta_chrf": 0.0
+    },
+    "tr->en": {
+      "n": 50,
+      "baseline_bleu": 57.23,
+      "baseline_chrf": 72.61,
+      "pipeline_bleu": 57.23,
+      "pipeline_chrf": 72.61,
+      "delta_bleu": 0.0,
+      "delta_chrf": 0.0
+    },
+    "en->de": {
+      "n": 50,
+      "baseline_bleu": 51.62,
+      "baseline_chrf": 67.7,
+      "pipeline_bleu": 51.62,
+      "pipeline_chrf": 67.7,
+      "delta_bleu": 0.0,
+      "delta_chrf": 0.0
+    },
+    "de->en": {
+      "n": 50,
+      "baseline_bleu": 62.78,
+      "baseline_chrf": 72.92,
+      "pipeline_bleu": 62.78,
+      "pipeline_chrf": 72.92,
+      "delta_bleu": 0.0,
+      "delta_chrf": 0.0
+    },
+    "en->ru": {
+      "n": 50,
+      "baseline_bleu": 46.7,
+      "baseline_chrf": 62.53,
+      "pipeline_bleu": 46.7,
+      "pipeline_chrf": 62.53,
+      "delta_bleu": 0.0,
+      "delta_chrf": 0.0
+    },
+    "ru->en": {
+      "n": 50,
+      "baseline_bleu": 56.75,
+      "baseline_chrf": 70.11,
+      "pipeline_bleu": 56.75,
+      "pipeline_chrf": 70.11,
+      "delta_bleu": 0.0,
+      "delta_chrf": 0.0
+    }
+  },
+  "style": {
+    "en": {
+      "n": 108,
+      "accuracy": 0.8611,
+      "macro_f1": 0.864,
+      "per_class": {
+        "formal": {
+          "precision": 1.0,
+          "recall": 0.8889,
+          "f1": 0.9412,
+          "support": 36
+        },
+        "neutral": {
+          "precision": 0.7442,
+          "recall": 0.8889,
+          "f1": 0.8101,
+          "support": 36
+        },
+        "casual": {
+          "precision": 0.8788,
+          "recall": 0.8056,
+          "f1": 0.8406,
+          "support": 36
+        }
+      },
+      "labels": [
+        "formal",
+        "neutral",
+        "casual"
+      ],
+      "confusion_matrix": [
+        [
+          32,
+          4,
+          0
+        ],
+        [
+          0,
+          32,
+          4
+        ],
+        [
+          0,
+          7,
+          29
+        ]
+      ]
+    },
+    "tr": {
+      "n": 108,
+      "accuracy": 0.6667,
+      "macro_f1": 0.6679,
+      "per_class": {
+        "formal": {
+          "precision": 1.0,
+          "recall": 0.4722,
+          "f1": 0.6415,
+          "support": 36
+        },
+        "neutral": {
+          "precision": 0.5,
+          "recall": 0.9722,
+          "f1": 0.6604,
+          "support": 36
+        },
+        "casual": {
+          "precision": 0.9524,
+          "recall": 0.5556,
+          "f1": 0.7018,
+          "support": 36
+        }
+      },
+      "labels": [
+        "formal",
+        "neutral",
+        "casual"
+      ],
+      "confusion_matrix": [
+        [
+          17,
+          19,
+          0
+        ],
+        [
+          0,
+          35,
+          1
+        ],
+        [
+          0,
+          16,
+          20
+        ]
+      ]
+    },
+    "de": {
+      "n": 108,
+      "accuracy": 0.7685,
+      "macro_f1": 0.7655,
+      "per_class": {
+        "formal": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1": 0.6667,
+          "support": 36
+        },
+        "neutral": {
+          "precision": 0.5965,
+          "recall": 0.9444,
+          "f1": 0.7312,
+          "support": 36
+        },
+        "casual": {
+          "precision": 0.9394,
+          "recall": 0.8611,
+          "f1": 0.8986,
+          "support": 36
+        }
+      },
+      "labels": [
+        "formal",
+        "neutral",
+        "casual"
+      ],
+      "confusion_matrix": [
+        [
+          18,
+          18,
+          0
+        ],
+        [
+          0,
+          34,
+          2
+        ],
+        [
+          0,
+          5,
+          31
+        ]
+      ]
+    },
+    "ru": {
+      "n": 108,
+      "accuracy": 0.75,
+      "macro_f1": 0.7533,
+      "per_class": {
+        "formal": {
+          "precision": 1.0,
+          "recall": 0.5556,
+          "f1": 0.7143,
+          "support": 36
+        },
+        "neutral": {
+          "precision": 0.5789,
+          "recall": 0.9167,
+          "f1": 0.7097,
+          "support": 36
+        },
+        "casual": {
+          "precision": 0.9032,
+          "recall": 0.7778,
+          "f1": 0.8358,
+          "support": 36
+        }
+      },
+      "labels": [
+        "formal",
+        "neutral",
+        "casual"
+      ],
+      "confusion_matrix": [
+        [
+          20,
+          16,
+          0
+        ],
+        [
+          0,
+          33,
+          3
+        ],
+        [
+          0,
+          8,
+          28
+        ]
+      ]
+    },
+    "overall": {
+      "n": 432,
+      "accuracy": 0.7616,
+      "macro_f1": 0.7667,
+      "per_class": {
+        "formal": {
+          "precision": 1.0,
+          "recall": 0.6042,
+          "f1": 0.7532,
+          "support": 144
+        },
+        "neutral": {
+          "precision": 0.5903,
+          "recall": 0.9306,
+          "f1": 0.7224,
+          "support": 144
+        },
+        "casual": {
+          "precision": 0.9153,
+          "recall": 0.75,
+          "f1": 0.8244,
+          "support": 144
+        }
+      },
+      "labels": [
+        "formal",
+        "neutral",
+        "casual"
+      ],
+      "confusion_matrix": [
+        [
+          87,
+          57,
+          0
+        ],
+        [
+          0,
+          134,
+          10
+        ],
+        [
+          0,
+          36,
+          108
+        ]
+      ]
+    }
+  },
+  "word_analysis": {
+    "n": 100,
+    "found": 100,
+    "pos_accuracy": 0.98,
+    "base_form_accuracy": 0.88,
+    "coverage": 1.0,
+    "errors": [
+      {
+        "sentence": "Öğrenciler sessizce sınıfa girdiler.",
+        "word": "girdiler",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "girmek",
+        "predicted_pos": "verb",
+        "predicted_base_form": "gir",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Küçük kedi bahçede uyuyordu.",
+        "word": "uyuyordu",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "uyumak",
+        "predicted_pos": "verb",
+        "predicted_base_form": "uyu",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Çocuklar parkta hızlıca koşarken yağmur başladı.",
+        "word": "hızlıca",
+        "language": "tr",
+        "expected_pos": "adv",
+        "expected_base_form": "hızlı",
+        "predicted_pos": "adv",
+        "predicted_base_form": "hızlıca",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Yaşlı adam dikkatlice eski kitabı okudu.",
+        "word": "okudu",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "okumak",
+        "predicted_pos": "verb",
+        "predicted_base_form": "oku",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Bugün toplantıya geç kaldığım için üzgünüm.",
+        "word": "geç",
+        "language": "tr",
+        "expected_pos": "adv",
+        "expected_base_form": "geç",
+        "predicted_pos": "adj",
+        "predicted_base_form": "geç",
+        "pos_ok": false,
+        "base_form_ok": true
+      },
+      {
+        "sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.",
+        "word": "sabırsızca",
+        "language": "tr",
+        "expected_pos": "adv",
+        "expected_base_form": "sabırsız",
+        "predicted_pos": "adv",
+        "predicted_base_form": "sabırsızca",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.",
+        "word": "bekleyen",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "beklemek",
+        "predicted_pos": "adj",
+        "predicted_base_form": "bekle",
+        "pos_ok": false,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Otobüs durağında sabırsızca bekleyen kadın gülümsedi.",
+        "word": "gülümsedi",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "gülümsemek",
+        "predicted_pos": "verb",
+        "predicted_base_form": "gülümse",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Kalabalık sokakta sessizce yürüdük.",
+        "word": "sessizce",
+        "language": "tr",
+        "expected_pos": "adv",
+        "expected_base_form": "sessiz",
+        "predicted_pos": "adv",
+        "predicted_base_form": "sessizce",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Telefonum masada aniden titremeye başladı.",
+        "word": "titremeye",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "titremek",
+        "predicted_pos": "verb",
+        "predicted_base_form": "titre",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Telefonum masada aniden titremeye başladı.",
+        "word": "başladı",
+        "language": "tr",
+        "expected_pos": "verb",
+        "expected_base_form": "başlamak",
+        "predicted_pos": "verb",
+        "predicted_base_form": "başla",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Genç doktor hastayı dikkatlice muayene etti.",
+        "word": "dikkatlice",
+        "language": "tr",
+        "expected_pos": "adv",
+        "expected_base_form": "dikkatli",
+        "predicted_pos": "adv",
+        "predicted_base_form": "dikkatlice",
+        "pos_ok": true,
+        "base_form_ok": false
+      },
+      {
+        "sentence": "Çiçekler ilkbaharda güzelce açtı.",
+        "word": "güzelce",
+        "language": "tr",
+        "expected_pos": "adv",
+        "expected_base_form": "güzel",
+        "predicted_pos": "adv",
+        "predicted_base_form": "güzelce",
+        "pos_ok": true,
+        "base_form_ok": false
+      }
+    ],
+    "error_count": 13
+  },
+  "latency_ms": {}
+}

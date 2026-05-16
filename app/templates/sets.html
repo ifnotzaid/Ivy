@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ivy - community</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #040806; --surface: #0a0f0c; --card: #0e1512; --card-hover: #141d19;
+    --floating: #111a15; --border: #1a2420; --border-lit: #243530;
+    --text: #e8f0ec; --text-2: #8fa89a; --text-3: #4a6356;
+    --ivy: #4ade80; --ivy-dim: rgba(74,222,128,0.08); --ivy-mid: rgba(74,222,128,0.15);
+    --formal: #a78bfa; --casual: #fb923c; --neutral: #64748b;
+    --danger: #ef4444; --danger-bg: rgba(239,68,68,0.08);
+    --font: 'Outfit', sans-serif; --mono: 'JetBrains Mono', monospace;
+    --r: 14px; --r-sm: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--font); min-height:100vh; }
+
+.container { max-width:1060px; margin:0 auto; padding:32px 20px; }
+
+/* Nav */
+.nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+.nav-left { display:flex; align-items:center; gap:16px; }
+.back-link { color:var(--text-3); text-decoration:none; font-size:13px; font-weight:500; display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid var(--border); transition:all 0.2s; }
+.back-link:hover { border-color:var(--ivy); color:var(--ivy); }
+.nav-logo img { height:50px; display:block; filter:brightness(1.28) saturate(1.18); }
+.nav-right { display:flex; gap:8px; }
+
+/* Tabs */
+.tabs { display:flex; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:4px; margin-bottom:24px; }
+.tab { background:none; border:none; color:var(--text-3); font-family:var(--font); font-size:13px; font-weight:500; padding:10px 20px; border-radius:7px; cursor:pointer; transition:all 0.2s; }
+.tab:hover { color:var(--text-2); }
+.tab.active { background:var(--card); color:var(--text); }
+
+/* Section */
+.section { display:none; }
+.section.active { display:block; }
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.section-title { font-size:18px; font-weight:600; }
+
+/* Cards */
+.set-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.set-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:20px; cursor:pointer; transition:all 0.2s; }
+.set-card:hover { border-color:var(--border-lit); transform:translateY(-1px); }
+.set-name { font-size:16px; font-weight:600; margin-bottom:4px; }
+.set-desc { font-size:13px; color:var(--text-2); margin-bottom:12px; line-height:1.5; }
+.set-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.set-badge { font-size:10px; font-weight:600; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:0.5px; }
+.badge-count { background:var(--ivy-dim); color:var(--ivy); }
+.badge-public { background:rgba(96,165,250,0.1); color:#60a5fa; }
+.badge-private { background:rgba(100,116,139,0.08); color:var(--text-3); }
+.badge-lang { background:rgba(167,139,250,0.08); color:var(--formal); }
+.set-owner { font-size:11px; color:var(--text-3); margin-top:8px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.set-card-fork { font-size:12px; padding:4px 10px; border-radius:6px; }
+
+/* Empty state */
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-3); }
+.empty-state h3 { font-size:18px; font-weight:600; color:var(--text-2); margin-bottom:8px; }
+.empty-state p { font-size:13px; line-height:1.6; max-width:360px; margin:0 auto; }
+
+/* Buttons */
+.btn { border:1px solid var(--border); border-radius:var(--r-sm); font-family:var(--font); font-size:13px; font-weight:500; padding:10px 20px; cursor:pointer; transition:all 0.2s; background:var(--card); color:var(--text-2); }
+.btn:hover { border-color:var(--border-lit); color:var(--text); }
+.btn-primary { background:var(--ivy); border-color:var(--ivy); color:#040806; font-weight:600; }
+.btn-primary:hover { opacity:0.9; }
+.btn-danger { color:var(--danger); }
+.btn-danger:hover { background:var(--danger-bg); }
+.btn-sm { padding:6px 14px; font-size:12px; }
+
+/* Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(4,8,6,0.88); z-index:500; justify-content:center; align-items:center; backdrop-filter:blur(8px); }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:440px; animation:modalIn 0.25s ease; }
+@keyframes modalIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+.modal h2 { font-size:18px; font-weight:600; margin-bottom:16px; }
+.modal-close { float:right; background:none; border:none; color:var(--text-3); font-size:20px; cursor:pointer; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:11px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+.field input, .field select, .field textarea { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); color:var(--text); font-family:var(--font); font-size:14px; padding:10px 12px; outline:none; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--ivy); }
+select option { background:var(--card); color:var(--text); }
+.field textarea { resize:vertical; min-height:60px; }
+.checkbox-row { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-2); cursor:pointer; }
+.checkbox-row input[type="checkbox"] { accent-color:var(--ivy); width:16px; height:16px; }
+.modal-error { color:var(--danger); font-size:12px; margin-top:8px; }
+
+/* Add words modal */
+.add-words-hint { font-size:13px; color:var(--text-2); margin-bottom:14px; }
+.add-words-search { margin-bottom:12px; }
+.add-words-search input { width:100%; padding:10px 12px; background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:8px; font-family:var(--font); font-size:13px; }
+.add-words-search input:focus { outline:none; border-color:var(--ivy); }
+.add-words-list { max-height:340px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; background:var(--surface); }
+.add-words-list::-webkit-scrollbar { width:8px; }
+.add-words-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+.add-words-empty { padding:32px 16px; text-align:center; color:var(--text-3); font-size:13px; line-height:1.5; }
+.add-word-row { display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border); transition:background 0.15s; }
+.add-word-row:last-child { border-bottom:none; }
+.add-word-row:hover, .add-word-row.is-selected { background:var(--ivy-dim); }
+.add-word-row.is-already { opacity:0.45; cursor:not-allowed; }
+.add-word-row.is-already:hover { background:transparent; }
+.add-word-checkbox { flex-shrink:0; width:18px; height:18px; border:1.5px solid var(--border-lit); border-radius:4px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.add-word-row.is-selected .add-word-checkbox { background:var(--ivy); border-color:var(--ivy); }
+.add-word-row.is-selected .add-word-checkbox::after { content:'\2713'; color:var(--surface); font-size:12px; font-weight:700; }
+.add-word-row.is-already .add-word-checkbox { background:var(--border); border-color:var(--border); }
+.add-word-row.is-already .add-word-checkbox::after { content:'\2022'; color:var(--text-3); font-size:14px; }
+.add-word-info { flex:1; min-width:0; }
+.add-word-text { font-size:14px; font-weight:600; color:var(--text); }
+.add-word-meaning { font-size:12px; color:var(--text-3); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.add-word-already-label { font-size:11px; color:var(--text-3); font-style:italic; flex-shrink:0; }
+.add-words-foot { display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:12px; }
+.add-words-counter { font-size:12px; color:var(--text-3); }
+.add-words-counter.has-selection { color:var(--ivy); font-weight:600; }
+
+/* Set detail view */
+.detail-header { margin-bottom:24px; }
+.detail-back { color:var(--text-3); font-size:13px; cursor:pointer; margin-bottom:12px; display:inline-flex; align-items:center; gap:4px; }
+.detail-back:hover { color:var(--ivy); }
+.detail-title { font-size:24px; font-weight:600; margin-bottom:4px; }
+.detail-desc { font-size:14px; color:var(--text-2); margin-bottom:12px; }
+.detail-meta { display:flex; gap:8px; margin-bottom:16px; }
+
+.word-list { display:flex; flex-direction:column; gap:8px; }
+.word-row { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-sm); padding:14px 16px; transition:border-color 0.2s; }
+.word-row:hover { border-color:var(--border-lit); }
+.word-main { flex:1; }
+.word-text { font-size:16px; font-weight:600; }
+.word-meaning { font-size:13px; color:var(--text-2); }
+.word-tags { display:flex; gap:4px; margin-top:4px; }
+.word-tag { font-size:9px; font-weight:600; padding:2px 6px; border-radius:4px; text-transform:uppercase; }
+.tag-pos { background:rgba(148,163,184,0.1); color:var(--text-2); }
+.tag-case { background:rgba(167,139,250,0.1); color:var(--formal); }
+.tag-cefr { border-radius:999px; padding:2px 8px; }
+.cefr-A1,.cefr-A2 { background:rgba(74,222,128,0.12); color:#4ade80; }
+.cefr-B1,.cefr-B2 { background:rgba(251,191,36,0.12); color:#fbbf24; }
+.cefr-C1 { background:rgba(244,114,182,0.12); color:#f472b6; }
+.word-remove { background:none; border:none; color:var(--text-3); font-size:16px; cursor:pointer; padding:4px; }
+.word-remove:hover { color:var(--danger); }
+
+/* Friends */
+.friend-list { display:flex; flex-direction:column; gap:8px; }
+.friend-card { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-sm); padding:14px 16px; }
+.friend-avatar { width:36px; height:36px; border-radius:50%; background:var(--ivy-dim); color:var(--ivy); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; flex-shrink:0; }
+.friend-info { flex:1; }
+.friend-name { font-size:14px; font-weight:600; }
+.friend-email { font-size:12px; color:var(--text-3); }
+.friend-actions { display:flex; gap:6px; }
+
+.pending-label { font-size:11px; font-weight:600; color:var(--casual); text-transform:uppercase; letter-spacing:0.5px; margin:20px 0 10px; }
+
+/* Add to set dropdown */
+.add-to-set-menu { position:relative; display:inline-block; }
+.add-to-set-list { display:none; position:absolute; top:100%; right:0; background:var(--floating); border:1px solid var(--border-lit); border-radius:var(--r-sm); padding:6px; min-width:200px; z-index:100; box-shadow:0 8px 32px rgba(0,0,0,0.4); margin-top:4px; }
+.add-to-set-list.open { display:block; }
+.add-to-set-item { display:block; width:100%; text-align:left; background:none; border:none; color:var(--text-2); font-family:var(--font); font-size:13px; padding:8px 12px; border-radius:6px; cursor:pointer; }
+.add-to-set-item:hover { background:var(--card-hover); color:var(--text); }
+
+@media (max-width:768px) {
+    .set-grid { grid-template-columns:1fr; }
+    .tabs { flex-wrap:wrap; }
+    .nav { flex-wrap:wrap; gap:12px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Nav -->
+<div class="nav">
+<div class="nav-left">
+<a class="back-link" href="/">&#8592; Translator</a>
+<div class="nav-logo"><img src="/static/logo-dark.png" alt="ivy"></div>
+</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+<button class="tab active" onclick="showTab('my-sets')">My sets</button>
+<button class="tab" onclick="showTab('browse')">Browse</button>
+<button class="tab" onclick="showTab('friends')">Friends</button>
+</div>
+
+<!-- My Sets -->
+<div class="section active" id="sec-my-sets">
+<div class="section-header">
+<div class="section-title">My sets</div>
+<button class="btn btn-primary" onclick="openCreateSet()">+ New set</button>
+</div>
+<div id="mySetsGrid" class="set-grid">
+<div class="empty-state"><h3>No sets yet</h3><p>Create a set to organize your saved vocabulary into themed collections</p></div>
+</div>
+</div>
+
+<!-- Browse public sets -->
+<div class="section" id="sec-browse">
+<div class="section-header">
+<div class="section-title">Public sets</div>
+</div>
+<div id="browseGrid" class="set-grid">
+<div class="empty-state"><h3>No public sets</h3><p>Public sets from other users will appear here</p></div>
+</div>
+</div>
+
+<!-- Friends -->
+<div class="section" id="sec-friends">
+<div class="section-header">
+<div class="section-title">Friends</div>
+<button class="btn" onclick="openAddFriend()">+ Add friend</button>
+</div>
+<div id="pendingRequests"></div>
+<div id="friendsList" class="friend-list">
+<div class="empty-state"><h3>No friends yet</h3><p>Add friends by email to see their public flashcard sets</p></div>
+</div>
+</div>
+
+<!-- Set detail view (hidden by default) -->
+<div class="section" id="sec-detail" style="display:none">
+<div class="detail-header">
+<div class="detail-back" onclick="closeDetail()">&#8592; Back to sets</div>
+<div class="detail-title" id="detailTitle"></div>
+<div class="detail-desc" id="detailDesc"></div>
+<div class="detail-meta" id="detailMeta"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<button class="btn btn-primary" id="studyBtn" onclick="goPracticeThisSet()">Study this set</button>
+<button class="btn btn-primary" id="saveToLibraryBtn" onclick="forkCurrentSet()" style="display:none">+ Save to my library</button>
+<button class="btn" id="addWordsBtn" onclick="openAddWords()">Add words</button>
+<button class="btn" id="togglePublicBtn" onclick="toggleSetPublic()">Make public</button>
+<button class="btn btn-danger" id="deleteSetBtn" onclick="deleteCurrentSet()">Delete</button>
+</div>
+</div>
+<div class="word-list" id="detailWords"></div>
+</div>
+
+</div>
+
+<!-- Create set modal -->
+<div class="modal-overlay" id="createSetModal">
+<div class="modal">
+<button class="modal-close" onclick="closeCreateSet()">&times;</button>
+<h2>New flashcard set</h2>
+<div class="field"><label>Name</label><input type="text" id="setName" placeholder="e.g., German cases, Turkish food vocab"></div>
+<div class="field"><label>Description (optional)</label><textarea id="setDesc" placeholder="What's this set about?"></textarea></div>
+<div class="field"><label>Language</label>
+<select id="setLang"><option value="">Any</option><option value="tr">Turkish</option><option value="ru">Russian</option><option value="de">German</option><option value="en">English</option></select>
+</div>
+<div class="field">
+<label class="checkbox-row"><input type="checkbox" id="setPublic"> Make this set public (friends can see it)</label>
+</div>
+<div class="modal-error" id="createSetError"></div>
+<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="createSet()">Create set</button>
+</div>
+</div>
+
+<!-- Add friend modal -->
+<div class="modal-overlay" id="addFriendModal">
+<div class="modal">
+<button class="modal-close" onclick="closeAddFriend()">&times;</button>
+<h2>Add a friend</h2>
+<p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Enter their email address to send a friend request</p>
+<div class="field"><label>Email</label><input type="email" id="friendEmail" placeholder="friend@email.com" onkeydown="submitFriendOnEnter(event)"></div>
+<div class="modal-error" id="addFriendError"></div>
+<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="sendRequest()">Send request</button>
+</div>
+</div>
+
+<!-- Add words modal -->
+<div class="modal-overlay" id="addWordsModal">
+<div class="modal" style="max-width:560px;">
+<button class="modal-close" onclick="closeAddWords()">&times;</button>
+<h2>Add words to this set</h2>
+<p class="add-words-hint" id="addWordsHint">Pick words from your saved vocabulary</p>
+<div class="add-words-search">
+<input type="text" id="addWordsSearch" placeholder="Filter by word or meaning..." oninput="filterAddWords()">
+</div>
+<div class="add-words-list" id="addWordsList"></div>
+<div class="add-words-foot">
+<div class="add-words-counter" id="addWordsCounter">0 selected</div>
+<div style="display:flex;gap:8px;">
+<button class="btn" onclick="closeAddWords()">Cancel</button>
+<button class="btn btn-primary" id="addWordsConfirm" onclick="confirmAddWords()" disabled>Add to set</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+var langNames = {tr:'Turkish', ru:'Russian', de:'German', en:'English'};
+var currentSetId = null;
+var currentSetData = null;
+var activeTab = 'my-sets';
+var addWordsState = { available: [], alreadyIds: new Set(), selected: new Set(), filter: '' };
+
+// Tabs
+function showTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(function(t, i) {
+        t.classList.toggle('active', ['my-sets','browse','friends'][i] === tab);
+    });
+    document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
+    var sec = document.getElementById('sec-' + tab);
+    if (sec) { sec.classList.add('active'); sec.style.display = 'block'; }
+
+    if (tab === 'my-sets') loadMySets();
+    if (tab === 'browse') loadBrowse();
+    if (tab === 'friends') loadFriends();
+}
+
+// Load my sets
+async function loadMySets() {
+    try {
+        var r = await fetch('/api/sets/list');
+        var d = await r.json();
+        if (d.error) { document.getElementById('mySetsGrid').innerHTML = '<div class="empty-state"><h3>Log in required</h3><p>Create an account to manage flashcard sets</p></div>'; return; }
+        if (d.sets.length === 0) { document.getElementById('mySetsGrid').innerHTML = '<div class="empty-state"><h3>No sets yet</h3><p>Create a set to organize your saved vocabulary</p></div>'; return; }
+        document.getElementById('mySetsGrid').innerHTML = d.sets.map(function(s) {
+            var badges = '<span class="set-badge badge-count">' + (s.word_count || 0) + ' words</span>';
+            if (s.is_public) badges += '<span class="set-badge badge-public">public</span>';
+            else badges += '<span class="set-badge badge-private">private</span>';
+            if (s.target_lang) badges += '<span class="set-badge badge-lang">' + (langNames[s.target_lang] || s.target_lang) + '</span>';
+            return '<div class="set-card" onclick="openSet(' + s.id + ')"><div class="set-name">' + s.name + '</div>' +
+                (s.description ? '<div class="set-desc">' + s.description + '</div>' : '') +
+                '<div class="set-meta">' + badges + '</div></div>';
+        }).join('');
+    } catch(e) { console.error(e); }
+}
+
+// Load public sets
+async function loadBrowse() {
+    try {
+        var r = await fetch('/api/sets/browse');
+        var d = await r.json();
+        if (d.sets.length === 0) { document.getElementById('browseGrid').innerHTML = '<div class="empty-state"><h3>No public sets yet</h3><p>Public sets from other users will appear here</p></div>'; return; }
+        var meId = null;
+        try {
+            var me = await fetch('/api/auth/me');
+            var meData = await me.json();
+            if (meData.user) meId = meData.user.id;
+        } catch(e) {}
+        document.getElementById('browseGrid').innerHTML = d.sets.map(function(s) {
+            var badges = '<span class="set-badge badge-count">' + (s.word_count || 0) + ' words</span>';
+            if (s.target_lang) badges += '<span class="set-badge badge-lang">' + (langNames[s.target_lang] || s.target_lang) + '</span>';
+            var canFork = meId && s.user_id !== meId && (s.word_count || 0) > 0;
+            var forkBtn = canFork ? '<button class="btn btn-primary set-card-fork" onclick="event.stopPropagation();quickForkSet(' + s.id + ', this)">+ Save</button>' : '';
+            return '<div class="set-card" onclick="openSet(' + s.id + ')"><div class="set-name">' + s.name + '</div>' +
+                (s.description ? '<div class="set-desc">' + s.description + '</div>' : '') +
+                '<div class="set-meta">' + badges + '</div>' +
+                '<div class="set-owner">by ' + (s.owner_name || 'Unknown') + forkBtn + '</div></div>';
+        }).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function quickForkSet(setId, btn) {
+    if (!btn || btn.disabled) return;
+    var originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+        var r = await fetch('/api/sets/' + setId + '/fork', { method: 'POST' });
+        var d = await r.json();
+        if (d.error) {
+            btn.textContent = 'Error';
+            setTimeout(function(){ btn.disabled = false; btn.textContent = originalText; }, 1500);
+            return;
+        }
+        btn.textContent = 'Saved';
+    } catch(e) {
+        btn.textContent = 'Error';
+        setTimeout(function(){ btn.disabled = false; btn.textContent = originalText; }, 1500);
+    }
+}
+
+// Open set detail
+async function openSet(setId) {
+    try {
+        var r = await fetch('/api/sets/' + setId);
+        var d = await r.json();
+        if (d.error) { alert(d.error); return; }
+        currentSetId = setId;
+        currentSetData = d.set;
+
+        document.getElementById('detailTitle').textContent = d.set.name;
+        document.getElementById('detailDesc').textContent = d.set.description || '';
+
+        var meta = '<span class="set-badge badge-count">' + d.words.length + ' words</span>';
+        if (d.set.is_public) meta += '<span class="set-badge badge-public">public</span>';
+        else meta += '<span class="set-badge badge-private">private</span>';
+        if (d.set.target_lang) meta += '<span class="set-badge badge-lang">' + (langNames[d.set.target_lang] || d.set.target_lang) + '</span>';
+        if (d.set.owner_name) meta += '<span style="font-size:12px;color:var(--text-3);margin-left:8px;">by ' + d.set.owner_name + '</span>';
+        document.getElementById('detailMeta').innerHTML = meta;
+
+        // Check if it's the user's own set
+        var isOwner = true; // We'll assume owner if we can see delete button
+        try {
+            var me = await fetch('/api/auth/me');
+            var meData = await me.json();
+            isOwner = meData.user && meData.user.id === d.set.user_id;
+        } catch(e) { isOwner = false; }
+
+        document.getElementById('deleteSetBtn').style.display = isOwner ? 'inline-flex' : 'none';
+        document.getElementById('togglePublicBtn').style.display = isOwner ? 'inline-flex' : 'none';
+        document.getElementById('addWordsBtn').style.display = isOwner ? 'inline-flex' : 'none';
+        document.getElementById('togglePublicBtn').textContent = d.set.is_public ? 'Make private' : 'Make public';
+        document.getElementById('studyBtn').style.display = (isOwner && d.words.length > 0) ? 'inline-flex' : 'none';
+        var canFork = (!isOwner) && d.set.is_public && d.words.length > 0;
+        document.getElementById('saveToLibraryBtn').style.display = canFork ? 'inline-flex' : 'none';
+
+        if (d.words.length === 0) {
+            document.getElementById('detailWords').innerHTML = '<div class="empty-state"><p>' + (isOwner ? 'No words in this set yet. Click "Add words" above to pick from your saved vocabulary.' : 'No words in this public set yet.') + '</p></div>';
+        } else {
+            document.getElementById('detailWords').innerHTML = d.words.map(function(w) {
+                var tags = '<span class="word-tag tag-pos">' + (w.pos || '') + '</span>';
+                if (w.grammatical_case) tags += '<span class="word-tag tag-case">' + w.grammatical_case + '</span>';
+                if (w.difficulty) tags += '<span class="word-tag tag-cefr cefr-' + w.difficulty + '">' + w.difficulty + '</span>';
+                var removeBtn = isOwner ? '<button class="word-remove" onclick="event.stopPropagation();removeFromSet(' + currentSetId + ',' + w.id + ')">&times;</button>' : '';
+                return '<div class="word-row"><div class="word-main"><div class="word-text">' + w.word + '</div><div class="word-meaning">' + (w.meaning || '') + '</div><div class="word-tags">' + tags + '</div></div>' + removeBtn + '</div>';
+            }).join('');
+        }
+
+        // Hide tabs, show detail
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
+        document.getElementById('sec-detail').style.display = 'block';
+        document.querySelector('.tabs').style.display = 'none';
+    } catch(e) { console.error(e); }
+}
+
+function closeDetail() {
+    document.getElementById('sec-detail').style.display = 'none';
+    document.querySelector('.tabs').style.display = 'flex';
+    showTab(activeTab);
+}
+
+// Create set
+function openCreateSet() { document.getElementById('createSetModal').classList.add('open'); }
+function closeCreateSet() { document.getElementById('createSetModal').classList.remove('open'); document.getElementById('createSetError').textContent = ''; }
+
+async function createSet() {
+    var name = document.getElementById('setName').value.trim();
+    if (!name) { document.getElementById('createSetError').textContent = 'Name is required'; return; }
+    try {
+        var r = await fetch('/api/sets/create', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                name: name,
+                description: document.getElementById('setDesc').value,
+                target_lang: document.getElementById('setLang').value,
+                is_public: document.getElementById('setPublic').checked
+            })
+        });
+        var d = await r.json();
+        if (d.error) { document.getElementById('createSetError').textContent = d.error; return; }
+        closeCreateSet();
+        document.getElementById('setName').value = '';
+        document.getElementById('setDesc').value = '';
+        loadMySets();
+    } catch(e) { document.getElementById('createSetError').textContent = 'Error creating set'; }
+}
+
+// Delete set
+async function deleteCurrentSet() {
+    if (!confirm('Delete this set? This cannot be undone.')) return;
+    try {
+        await fetch('/api/sets/' + currentSetId + '/delete', { method: 'DELETE' });
+        closeDetail();
+    } catch(e) { console.error(e); }
+}
+
+// Toggle public/private
+async function toggleSetPublic() {
+    var newPublic = !currentSetData.is_public;
+    try {
+        await fetch('/api/sets/' + currentSetId + '/visibility', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ is_public: newPublic })
+        });
+        openSet(currentSetId); // Refresh
+    } catch(e) { console.error(e); }
+}
+
+// Remove word from set
+async function removeFromSet(setId, vocabId) {
+    try {
+        await fetch('/api/sets/' + setId + '/remove', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ vocab_id: vocabId })
+        });
+        openSet(setId); // Refresh
+    } catch(e) { console.error(e); }
+}
+
+function escapeHtml(s) {
+    return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function goPracticeThisSet() {
+    if (!currentSetId) return;
+    var lang = currentSetData && currentSetData.target_lang ? currentSetData.target_lang : '';
+    var hash = '#flashcards?set=' + encodeURIComponent(currentSetId);
+    if (lang) hash += '&lang=' + encodeURIComponent(lang);
+    window.location.href = '/' + hash;
+}
+
+async function forkCurrentSet() {
+    if (!currentSetId) return;
+    var btn = document.getElementById('saveToLibraryBtn');
+    if (!btn || btn.disabled) return;
+    var originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+        var r = await fetch('/api/sets/' + currentSetId + '/fork', { method: 'POST' });
+        var d = await r.json();
+        if (d.error) {
+            btn.textContent = d.error;
+            setTimeout(function(){ btn.disabled = false; btn.textContent = originalText; }, 2000);
+            return;
+        }
+        var msg = 'Saved!';
+        if (d.words_copied === 0 && d.words_existing > 0) {
+            msg = 'Saved (' + d.words_existing + ' already in vocab)';
+        } else if (d.words_existing > 0) {
+            msg = 'Saved (+' + d.words_copied + ' new, ' + d.words_existing + ' already in vocab)';
+        } else if (d.words_copied > 0) {
+            msg = 'Saved (+' + d.words_copied + ' words)';
+        }
+        btn.textContent = msg;
+        setTimeout(function(){
+            activeTab = 'my-sets';
+            openSet(d.new_set_id);
+        }, 1100);
+    } catch(e) {
+        btn.textContent = 'Error - try again';
+        setTimeout(function(){ btn.disabled = false; btn.textContent = originalText; }, 2000);
+    }
+}
+
+// Add saved vocabulary to a set
+function openAddWords() {
+    if (!currentSetId || !currentSetData) return;
+    addWordsState = { available: [], alreadyIds: new Set(), selected: new Set(), filter: '' };
+    document.getElementById('addWordsSearch').value = '';
+    document.getElementById('addWordsCounter').textContent = '0 selected';
+    document.getElementById('addWordsCounter').classList.remove('has-selection');
+    document.getElementById('addWordsConfirm').disabled = true;
+    document.getElementById('addWordsConfirm').textContent = 'Add to set';
+    document.getElementById('addWordsHint').textContent = 'Pick saved ' + (langNames[currentSetData.target_lang] || currentSetData.target_lang || '') + ' words for "' + currentSetData.name + '".';
+    document.getElementById('addWordsList').innerHTML = '<div class="add-words-empty">Loading vocabulary...</div>';
+    document.getElementById('addWordsModal').classList.add('open');
+
+    Promise.all([
+        fetch('/api/sets/' + currentSetId).then(function(r) { return r.json(); }),
+        fetch('/api/vocab/list?lang=' + encodeURIComponent(currentSetData.target_lang || '')).then(function(r) { return r.json(); })
+    ]).then(function(results) {
+        var setData = results[0];
+        var vocabData = results[1];
+        addWordsState.alreadyIds = new Set((setData.words || []).map(function(w) { return w.id; }));
+        addWordsState.available = vocabData.words || [];
+        renderAddWordsList();
+    }).catch(function(e) {
+        console.error(e);
+        document.getElementById('addWordsList').innerHTML = '<div class="add-words-empty">Could not load your vocabulary.</div>';
+    });
+}
+
+function renderAddWordsList() {
+    var list = document.getElementById('addWordsList');
+    var filter = (addWordsState.filter || '').toLocaleLowerCase().trim();
+    if (!addWordsState.available.length) {
+        list.innerHTML = '<div class="add-words-empty">No saved vocabulary in this language yet. Save some words from the translator first.</div>';
+        return;
+    }
+    var visible = addWordsState.available.filter(function(w) {
+        if (!filter) return true;
+        var hay = ((w.word || '') + ' ' + (w.meaning || '') + ' ' + (w.base_form || '')).toLocaleLowerCase();
+        return hay.indexOf(filter) !== -1;
+    });
+    if (!visible.length) {
+        list.innerHTML = '<div class="add-words-empty">No words match "' + escapeHtml(filter) + '".</div>';
+        return;
+    }
+    list.innerHTML = visible.map(function(w) {
+        var already = addWordsState.alreadyIds.has(w.id);
+        var selected = addWordsState.selected.has(w.id);
+        var classes = 'add-word-row';
+        if (already) classes += ' is-already';
+        else if (selected) classes += ' is-selected';
+        var clickHandler = already ? '' : 'onclick="toggleAddWord(' + w.id + ')"';
+        var label = already ? '<span class="add-word-already-label">already in set</span>' : '';
+        return '<div class="' + classes + '" ' + clickHandler + '>' +
+            '<div class="add-word-checkbox"></div>' +
+            '<div class="add-word-info">' +
+            '<div class="add-word-text">' + escapeHtml(w.word || '') + '</div>' +
+            '<div class="add-word-meaning">' + escapeHtml(w.meaning || w.base_form || '') + '</div>' +
+            '</div>' + label + '</div>';
+    }).join('');
+}
+
+function toggleAddWord(vocabId) {
+    if (addWordsState.alreadyIds.has(vocabId)) return;
+    if (addWordsState.selected.has(vocabId)) addWordsState.selected.delete(vocabId);
+    else addWordsState.selected.add(vocabId);
+    renderAddWordsList();
+    var n = addWordsState.selected.size;
+    var counter = document.getElementById('addWordsCounter');
+    counter.textContent = n + ' selected';
+    counter.classList.toggle('has-selection', n > 0);
+    document.getElementById('addWordsConfirm').disabled = n === 0;
+}
+
+function filterAddWords() {
+    addWordsState.filter = document.getElementById('addWordsSearch').value;
+    renderAddWordsList();
+}
+
+function closeAddWords() {
+    document.getElementById('addWordsModal').classList.remove('open');
+}
+
+async function confirmAddWords() {
+    var btn = document.getElementById('addWordsConfirm');
+    var ids = Array.from(addWordsState.selected);
+    if (!ids.length) return;
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+    try {
+        await Promise.all(ids.map(function(vid) {
+            return fetch('/api/sets/' + currentSetId + '/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ vocab_id: vid })
+            }).then(function(r) {
+                if (!r.ok) throw new Error('Could not add word ' + vid);
+                return r;
+            });
+        }));
+        closeAddWords();
+        openSet(currentSetId);
+        loadMySets();
+    } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Add to set';
+        alert('Could not add some words. Please try again.');
+    }
+}
+
+// Friends
+function openAddFriend() {
+    document.getElementById('addFriendModal').classList.add('open');
+    setTimeout(function(){ document.getElementById('friendEmail').focus(); }, 0);
+}
+function closeAddFriend() { document.getElementById('addFriendModal').classList.remove('open'); document.getElementById('addFriendError').textContent = ''; }
+
+function submitFriendOnEnter(event) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    sendRequest();
+}
+
+async function sendRequest() {
+    var email = document.getElementById('friendEmail').value.trim();
+    var errEl = document.getElementById('addFriendError');
+    var btn = document.querySelector('#addFriendModal .btn-primary');
+    errEl.textContent = '';
+    errEl.style.color = '';
+    if (!email) { errEl.textContent = 'Email required'; return; }
+    if (!btn) return;
+    if (btn.disabled) return;
+    btn.disabled = true;
+    var originalText = btn.textContent;
+    btn.textContent = 'Sending...';
+    try {
+        var r = await fetch('/api/friends/request', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: email })
+        });
+        var d = await r.json();
+        if (d.error) {
+            errEl.textContent = d.error;
+            btn.disabled = false;
+            btn.textContent = originalText;
+            return;
+        }
+        errEl.style.color = 'var(--ivy)';
+        errEl.textContent = 'Request sent to ' + email;
+        btn.textContent = 'Sent';
+        setTimeout(function(){
+            closeAddFriend();
+            document.getElementById('friendEmail').value = '';
+            btn.disabled = false;
+            btn.textContent = originalText;
+            errEl.style.color = '';
+            loadFriends();
+        }, 1200);
+    } catch(e) {
+        errEl.textContent = 'Error sending request';
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+async function loadFriends() {
+    try {
+        var r = await fetch('/api/friends/list');
+        var d = await r.json();
+        if (d.error) { document.getElementById('friendsList').innerHTML = '<div class="empty-state"><h3>Log in required</h3></div>'; return; }
+
+        var html = '';
+
+        // Pending requests
+        if (d.pending && d.pending.length > 0) {
+            html += '<div class="pending-label">Pending requests</div>';
+            html += d.pending.map(function(p) {
+                return '<div class="friend-card">' +
+                    '<div class="friend-avatar">' + p.display_name.substring(0,2).toUpperCase() + '</div>' +
+                    '<div class="friend-info"><div class="friend-name">' + p.display_name + '</div><div class="friend-email">' + p.email + '</div></div>' +
+                    '<div class="friend-actions">' +
+                    '<button class="btn btn-primary btn-sm" onclick="acceptFriend(' + p.friendship_id + ')">Accept</button>' +
+                    '<button class="btn btn-sm" onclick="rejectFriend(' + p.friendship_id + ')">Decline</button>' +
+                    '</div></div>';
+            }).join('');
+        }
+
+        // Accepted friends
+        if (d.friends && d.friends.length > 0) {
+            html += d.friends.map(function(f) {
+                var friendName = String(f.display_name || 'Friend');
+                var safeName = friendName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                return '<div class="friend-card">' +
+                    '<div class="friend-avatar">' + f.display_name.substring(0,2).toUpperCase() + '</div>' +
+                    '<div class="friend-info"><div class="friend-name">' + f.display_name + '</div><div class="friend-email">' + f.email + '</div></div>' +
+                    '<div class="friend-actions">' +
+                    '<button class="btn btn-sm" onclick="viewFriendSets(' + f.friend_id + ',\'' + safeName + '\')">View sets</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="removeFriend(' + f.friendship_id + ',\'' + safeName + '\')">Remove</button>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        } else if (!d.pending || d.pending.length === 0) {
+            html = '<div class="empty-state"><h3>No friends yet</h3><p>Add friends by email to see their public flashcard sets</p></div>';
+        }
+
+        document.getElementById('friendsList').innerHTML = html;
+    } catch(e) { console.error(e); }
+}
+
+async function acceptFriend(id) {
+    await fetch('/api/friends/accept/' + id, { method: 'POST' });
+    loadFriends();
+}
+
+async function rejectFriend(id) {
+    await fetch('/api/friends/reject/' + id, { method: 'POST' });
+    loadFriends();
+}
+
+async function removeFriend(id, name) {
+    if (!confirm('Remove ' + name + ' from your friends?')) return;
+    try {
+        var r = await fetch('/api/friends/remove/' + id, { method: 'POST' });
+        var d = await r.json();
+        if (d.error) { alert(d.error); return; }
+        loadFriends();
+    } catch(e) {
+        alert('Could not remove friend. Please try again.');
+    }
+}
+
+async function viewFriendSets(friendId, friendName) {
+    try {
+        var r = await fetch('/api/friends/' + friendId + '/sets');
+        var d = await r.json();
+        if (d.error) { alert(d.error); return; }
+
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
+        document.querySelector('.tabs').style.display = 'none';
+
+        var sec = document.getElementById('sec-detail');
+        document.getElementById('detailTitle').textContent = friendName + "'s public sets";
+        document.getElementById('detailDesc').textContent = '';
+        document.getElementById('detailMeta').innerHTML = '<span class="set-badge badge-count">' + d.sets.length + ' public sets</span>';
+        document.getElementById('studyBtn').style.display = 'none';
+        document.getElementById('saveToLibraryBtn').style.display = 'none';
+        document.getElementById('addWordsBtn').style.display = 'none';
+        document.getElementById('togglePublicBtn').style.display = 'none';
+        document.getElementById('deleteSetBtn').style.display = 'none';
+
+        if (d.sets.length === 0) {
+            document.getElementById('detailWords').innerHTML = '<div class="empty-state"><p>' + friendName + ' has no public sets yet</p></div>';
+        } else {
+            document.getElementById('detailWords').innerHTML = '<div class="set-grid">' + d.sets.map(function(s) {
+                var badges = '<span class="set-badge badge-count">' + (s.word_count || 0) + ' words</span>';
+                if (s.target_lang) badges += '<span class="set-badge badge-lang">' + (langNames[s.target_lang] || s.target_lang) + '</span>';
+                return '<div class="set-card" onclick="openSet(' + s.id + ')"><div class="set-name">' + s.name + '</div>' +
+                    (s.description ? '<div class="set-desc">' + s.description + '</div>' : '') +
+                    '<div class="set-meta">' + badges + '</div></div>';
+            }).join('') + '</div>';
+        }
+        sec.style.display = 'block';
+    } catch(e) { console.error(e); }
+}
+
+// Init
+var initialTab = (window.location.hash || '').replace('#', '');
+if (['my-sets', 'browse', 'friends'].indexOf(initialTab) !== -1) {
+    showTab(initialTab);
+} else {
+    loadMySets();
+}
+</script>
+</body>
+</html>
