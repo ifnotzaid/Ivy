@@ -123,7 +123,9 @@ GOOGLE_TTS_LANGUAGE_CODES = {
 }
 TTS_BYTE_LIMIT = 3500
 MARKED_TTS_BYTE_LIMIT = 4600
+MARKED_TTS_SYNC_VERSION = 2
 STORY_SENTENCE_SPLIT_RE = r"(?<=[.!?\u3002\uff01\uff1f])\s+"
+STORY_MARK_TOKEN_RE = re.compile(r"[^\W_]+(?:['\u2019-][^\W_]+)*", re.UNICODE)
 
 
 def has_turkish_formal_copula(text: str) -> bool:
@@ -1097,16 +1099,87 @@ def _ssml_escape(text: str) -> str:
     )
 
 
-def _build_marked_story_ssml(words: list[str]) -> str:
+def _normalize_story_mark_token(value: str) -> str:
+    return re.sub(r"^[\W_]+|[\W_]+$", "", str(value or ""), flags=re.UNICODE).casefold()
+
+
+def _is_pure_story_punct(value: str) -> bool:
+    return not bool(STORY_MARK_TOKEN_RE.search(str(value or "")))
+
+
+def _word_item_text(item) -> str:
+    if isinstance(item, dict):
+        return str(item.get("word") or "")
+    return str(item or "")
+
+
+def _word_item_base(item) -> str:
+    if isinstance(item, dict):
+        return str(item.get("base_form") or "")
+    return ""
+
+
+def _next_story_word_index(word_items: list, start: int, display_token: str) -> int:
+    first_usable = -1
+    target = _normalize_story_mark_token(display_token)
+    for index in range(max(0, start), len(word_items)):
+        item = word_items[index]
+        item_word = _word_item_text(item)
+        if _is_pure_story_punct(item_word):
+            continue
+        if first_usable < 0:
+            first_usable = index
+        normalized_word = _normalize_story_mark_token(item_word)
+        normalized_base = _normalize_story_mark_token(_word_item_base(item))
+        if target and (normalized_word == target or normalized_base == target):
+            return index
+        if first_usable >= 0 and index - first_usable >= 4:
+            break
+    return first_usable
+
+
+def _build_marked_story_ssml_from_text(story_text: str, word_items: list) -> tuple[str, int]:
+    """
+    Build SSML from the original story text, preserving punctuation and spacing.
+
+    The matching mirrors the browser's renderWordsFromSource() logic so mark
+    names line up with .word-span[data-index] instead of plain DOM position.
+    """
     parts = ["<speak>"]
+    last_offset = 0
+    data_cursor = 0
+    mark_count = 0
+
+    for match in STORY_MARK_TOKEN_RE.finditer(story_text or ""):
+        parts.append(_ssml_escape((story_text or "")[last_offset:match.start()]))
+        token = match.group(0)
+        data_index = _next_story_word_index(word_items, data_cursor, token)
+        if data_index >= 0:
+            parts.append(f'<mark name="w{data_index}"/>')
+            parts.append(_ssml_escape(token))
+            data_cursor = data_index + 1
+            mark_count += 1
+        else:
+            parts.append(_ssml_escape(token))
+        last_offset = match.end()
+
+    parts.append(_ssml_escape((story_text or "")[last_offset:]))
+    parts.append("</speak>")
+    return "".join(parts), mark_count
+
+
+def _build_marked_story_ssml_from_words(words: list[str]) -> tuple[str, int]:
+    parts = ["<speak>"]
+    mark_count = 0
     for index, word in enumerate(words):
         token = str(word or "").strip()
         parts.append(f'<mark name="w{index}"/>')
+        mark_count += 1
         if token:
             parts.append(_ssml_escape(token))
             parts.append(" ")
     parts.append("</speak>")
-    return "".join(parts)
+    return "".join(parts), mark_count
 
 
 def _ssml_mark_timepoint_value(texttospeech):
@@ -1123,18 +1196,31 @@ def _ssml_mark_timepoint_value(texttospeech):
     return 1
 
 
-def synthesize_marked_story_audio(words: list[str], language: str) -> tuple[bytes, list[dict]]:
+def _timepoints_are_current(timepoints: list[dict]) -> bool:
+    return bool(timepoints) and all(
+        isinstance(item, dict) and item.get("sync_version") == MARKED_TTS_SYNC_VERSION
+        for item in timepoints
+    )
+
+
+def synthesize_marked_story_audio(word_items: list, language: str, story_text: str = "") -> tuple[bytes, list[dict]]:
     """
     Synthesize narration with SSML mark timepoints.
 
     The words list must come from story word_data in display order, so returned
     timepoint indexes line up with .word-span[data-index] in the story reader.
     """
-    word_strings = [str(word or "") for word in (words or [])]
+    word_strings = [_word_item_text(item) for item in (word_items or [])]
     if not word_strings:
         raise RuntimeError("No words supplied for word-synced narration")
 
-    ssml = _build_marked_story_ssml(word_strings)
+    ssml = ""
+    mark_count = 0
+    if (story_text or "").strip():
+        ssml, mark_count = _build_marked_story_ssml_from_text(story_text, word_items or [])
+    if not mark_count:
+        ssml, mark_count = _build_marked_story_ssml_from_words(word_strings)
+
     ssml_bytes = _utf8_len(ssml)
     if ssml_bytes > MARKED_TTS_BYTE_LIMIT:
         raise RuntimeError(
@@ -1184,7 +1270,13 @@ def synthesize_marked_story_audio(words: list[str], language: str) -> tuple[byte
             index = int(mark_name[1:])
         except ValueError:
             continue
-        timepoints.append({"index": index, "time": float(timepoint.time_seconds)})
+        if index < 0 or index >= len(word_strings):
+            continue
+        timepoints.append({
+            "index": index,
+            "time": float(timepoint.time_seconds),
+            "sync_version": MARKED_TTS_SYNC_VERSION,
+        })
     timepoints.sort(key=lambda item: item["time"])
     if not timepoints:
         raise RuntimeError("Google Cloud TTS did not return word-sync timing data")
@@ -1521,13 +1613,16 @@ def api_story_tts_marked():
     data = request.json or {}
     language = data.get("language", "tr")
     story_id = data.get("story_id")
+    story_text = data.get("story_text") or data.get("text") or ""
+    word_data = data.get("word_data") if isinstance(data.get("word_data"), list) else []
     words = data.get("words")
-    if not words and isinstance(data.get("word_data"), list):
-        words = [item.get("word", "") if isinstance(item, dict) else "" for item in data.get("word_data")]
+    if not words and word_data:
+        words = [item.get("word", "") if isinstance(item, dict) else "" for item in word_data]
+    word_items = word_data if word_data else [str(word or "") for word in (words or [])]
 
     if language not in LANGUAGES:
         return jsonify({"error": "Unsupported language selection"}), 400
-    if not isinstance(words, list) or not words:
+    if not isinstance(word_items, list) or not word_items:
         return jsonify({"error": "Words are required for word-synced narration"}), 400
 
     user = None
@@ -1544,15 +1639,17 @@ def api_story_tts_marked():
                 saved_story = get_saved_story(user["id"], parsed_story_id)
                 if saved_story:
                     cached = get_story_narration(user["id"], parsed_story_id)
-                    if cached:
+                    if cached and _timepoints_are_current(cached["timepoints"]):
                         return jsonify({
                             "audio_b64": base64.b64encode(cached["audio_bytes"]).decode("ascii"),
                             "timepoints": cached["timepoints"],
                             "cached": True,
                         })
+                    if not story_text:
+                        story_text = saved_story.get("story_text") or ""
 
     try:
-        audio, timepoints = synthesize_marked_story_audio([str(word or "") for word in words], language)
+        audio, timepoints = synthesize_marked_story_audio(word_items, language, story_text)
     except RuntimeError as exc:
         status = 503 if "failed" in str(exc).lower() else 400
         return jsonify({"error": str(exc)}), status
@@ -1612,7 +1709,7 @@ def api_get_story_narration(story_id):
         return jsonify({"error": "Login required"}), 401
 
     cached = get_story_narration(user["id"], story_id)
-    if not cached:
+    if not cached or not _timepoints_are_current(cached["timepoints"]):
         return jsonify({"error": "No synced narration for this story"}), 404
 
     return jsonify({

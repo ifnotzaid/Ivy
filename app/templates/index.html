@@ -1399,6 +1399,10 @@
                 transition: background 0.12s ease, color 0.16s ease, opacity 0.2s ease, box-shadow 0.16s ease;
             }
 
+            #storyText.karaoke-active .story-punct {
+                transition: color 0.16s ease, opacity 0.2s ease;
+            }
+
             #storyText .word-span.is-speaking {
                 background: var(--ivy-mid) !important;
                 color: var(--ivy) !important;
@@ -1412,6 +1416,11 @@
             }
 
             #storyText .word-span.is-spoken:not(.is-speaking) {
+                color: var(--text-2);
+                opacity: 0.72;
+            }
+
+            #storyText .story-punct.is-spoken {
                 color: var(--text-2);
                 opacity: 0.72;
             }
@@ -3814,7 +3823,7 @@ let storyWordAudioToken=0;
 let activeWordSourceText='',activeWordTranslationText='',activeWordSourceLang='en',activeWordTargetLang='tr',activeWordStyle='neutral';
 let currentStoryAudioUrl='';
 let currentStoryNarrationB64='';
-let karaokeEnabled=false,karaokeRaf=null,karaokeFetchToken=0,karaokeLastSpokenIndex=-1;
+let karaokeEnabled=false,karaokeRaf=null,karaokeFetchToken=0,karaokeLastSpokenIndex=-1,karaokeDataPromise=null;
 let karaokeWordSpans=[];
 let vocabCounts={tr:0,de:0,ru:0,en:0};
 const PERSONALIZE_THRESHOLD=10;
@@ -4847,6 +4856,7 @@ function applyStoryWordAnalysis(story,wordData,readyMessage){
         setKaraokeAvailable(true);
         clearKaraokeHighlights();
         if(readyMessage)setStoryStatus(readyMessage,'ready');
+        maybeAutoPrepareKaraoke();
     }
     return story.word_data;
 }
@@ -5268,6 +5278,15 @@ var inputArea=$('inputArea');
         return '<span class="word-span' + vulgarClass + '" data-pos="' + safePos + '" data-index="' + index + '" data-vulgar="' + vulgar + '">' + escapeHtml(shownWord) + '<span class="tooltip"><div class="tooltip-header"><div><div class="tooltip-word-row"><div class="tooltip-word">' + escapeHtml(w.word) + (vulgar ? ' <span style="color:#ef4444;font-size:11px;">&#9888;</span>' : '') + '</div>' + speakButton + '</div>' + (baseForm !== w.word ? '<div class="tooltip-base">' + escapeHtml(baseForm) + '</div>' : '') + '</div>' + (diff ? '<span class="tooltip-cefr cefr-' + escapeHtml(diff) + '">' + escapeHtml(diff) + '</span>' : '') + '</div>' + (meaning ? '<div class="tooltip-meaning">' + escapeHtml(meaning) + '</div>' : '') + '<div class="tooltip-tags">' + tags + '</div><button class="tooltip-save" onclick="saveWord(event,' + index + ')">+ Save to vocabulary</button></span></span>';
     }
 
+    function renderStoryGapSegment(segment, previousWordIndex, allowStoryAudio){
+        if(!segment)return '';
+        if(!allowStoryAudio||previousWordIndex<0)return escapeHtml(segment);
+        return String(segment).replace(/\s+|\S+/g,function(piece){
+            if(/^\s+$/.test(piece))return escapeHtml(piece);
+            return '<span class="story-punct" data-after-index="'+previousWordIndex+'">'+escapeHtml(piece)+'</span>';
+        });
+    }
+
     function renderWordsFromSource(wordData, sourceText, options){
         var opts=options||{};
         var allowStoryAudio=!!opts.storyAudio;
@@ -5275,20 +5294,23 @@ var inputArea=$('inputArea');
         var html='';
         var lastOffset=0;
         var dataCursor=0;
+        var previousDataIndex=-1;
         var match;
         var tokenRe=displayTokenPattern();
         while((match=tokenRe.exec(text))!==null){
-            html+=escapeHtml(text.slice(lastOffset,match.index));
+            html+=renderStoryGapSegment(text.slice(lastOffset,match.index),previousDataIndex,allowStoryAudio);
             var dataIndex=nextWordDataIndex(wordData,dataCursor,match[0]);
             if(dataIndex>=0){
                 html+=renderWordSpan(wordData[dataIndex],dataIndex,match[0],allowStoryAudio);
                 dataCursor=dataIndex+1;
+                previousDataIndex=dataIndex;
             }else{
                 html+=escapeHtml(match[0]);
+                previousDataIndex=-1;
             }
             lastOffset=match.index+match[0].length;
         }
-        html+=escapeHtml(text.slice(lastOffset));
+        html+=renderStoryGapSegment(text.slice(lastOffset),previousDataIndex,allowStoryAudio);
         return html;
     }
 
@@ -5427,6 +5449,8 @@ function enrichWordDataWithFocus(wordData,focusVocabulary){
 
 function renderStoryContent(story){
     currentStory=story||{};
+    karaokeFetchToken++;
+    karaokeDataPromise=null;
     currentStory.saved=!!currentStory.saved;
     currentStory.audio_url=currentStory.audio_url||'';
     currentStory.timepoints=Array.isArray(currentStory.timepoints)?currentStory.timepoints:[];
@@ -5469,6 +5493,7 @@ function renderStoryContent(story){
     }
     setKaraokeAvailable(Array.isArray(currentStory.word_data)&&currentStory.word_data.length>0);
     clearKaraokeHighlights();
+    maybeAutoPrepareKaraoke();
 }
 
 async function analyzeStoryWords(text,targetLang){
@@ -5792,6 +5817,17 @@ function setKaraokeAvailable(available){
     btn.title=available?'Highlight each word as it is spoken':'Word sync is available after word analysis finishes';
 }
 
+function maybeAutoPrepareKaraoke(){
+    if(!karaokeEnabled||!currentStory||!Array.isArray(currentStory.word_data)||!currentStory.word_data.length)return;
+    if(currentStory.audio_url&&Array.isArray(currentStory.timepoints)&&currentStory.timepoints.length)return;
+    var player=$('storyAudioPlayer');
+    if(player&&!player.paused&&!player.ended)return;
+    setStoryTtsButtonsBusy('google',true);
+    ensureKaraokeData().finally(function(){
+        setStoryTtsButtonsBusy('google',false);
+    });
+}
+
 function toggleStoryKaraoke(){
     var btn=$('storyKaraokeToggle');
     if(!btn||btn.disabled)return;
@@ -5801,8 +5837,15 @@ function toggleStoryKaraoke(){
     if(karaokeEnabled){
         if(currentStory&&currentStory.timepoints&&currentStory.timepoints.length){
             startKaraokeLoop();
-        }else if(currentStory&&currentStory.audio_url&&Array.isArray(currentStory.word_data)&&currentStory.word_data.length){
-            ensureKaraokeData();
+        }else if(currentStory&&Array.isArray(currentStory.word_data)&&currentStory.word_data.length){
+            setStoryTtsButtonsBusy('google',true);
+            ensureKaraokeData().then(function(ready){
+                if(ready){
+                    startKaraokeLoop();
+                }
+            }).finally(function(){
+                setStoryTtsButtonsBusy('google',false);
+            });
         }
     }else{
         stopKaraokeLoop();
@@ -5811,7 +5854,7 @@ function toggleStoryKaraoke(){
 }
 
 function clearKaraokeHighlights(){
-    document.querySelectorAll('#storyText .word-span.is-speaking,#storyText .word-span.is-spoken').forEach(function(span){
+    document.querySelectorAll('#storyText .word-span.is-speaking,#storyText .word-span.is-spoken,#storyText .story-punct.is-spoken').forEach(function(span){
         span.classList.remove('is-speaking','is-spoken');
     });
     var storyText=$('storyText');
@@ -5820,7 +5863,39 @@ function clearKaraokeHighlights(){
 }
 
 function refreshKaraokeWordSpans(){
-    karaokeWordSpans=Array.prototype.slice.call(document.querySelectorAll('#storyText .word-span'));
+    karaokeWordSpans=[];
+    Array.prototype.slice.call(document.querySelectorAll('#storyText .word-span')).forEach(function(span){
+        var index=parseInt(span.getAttribute('data-index')||'',10);
+        if(!isNaN(index)){
+            karaokeWordSpans[index]=span;
+        }
+    });
+}
+
+function forEachKaraokeSpan(callback){
+    Array.prototype.slice.call(document.querySelectorAll('#storyText .word-span')).forEach(function(span){
+        var index=parseInt(span.getAttribute('data-index')||'',10);
+        if(!isNaN(index)){
+            callback(span,index);
+        }
+    });
+}
+
+function forEachKaraokePunct(callback){
+    Array.prototype.slice.call(document.querySelectorAll('#storyText .story-punct')).forEach(function(span){
+        var index=parseInt(span.getAttribute('data-after-index')||'',10);
+        if(!isNaN(index)){
+            callback(span,index);
+        }
+    });
+}
+
+function setKaraokePunctSpoken(wordIndex,spoken){
+    forEachKaraokePunct(function(span,index){
+        if(index===wordIndex){
+            span.classList.toggle('is-spoken',!!spoken);
+        }
+    });
 }
 
 function findTimepointIndex(currentTime,timepoints){
@@ -5845,8 +5920,11 @@ function syncKaraokeHighlight(){
     if(!player)return;
     var timepointIndex=findTimepointIndex(player.currentTime||0,currentStory.timepoints);
     var wordIndex=timepointIndex>=0?currentStory.timepoints[timepointIndex].index:-1;
-    karaokeWordSpans.forEach(function(span,index){
+    forEachKaraokeSpan(function(span,index){
         span.classList.remove('is-speaking');
+        span.classList.toggle('is-spoken',wordIndex>=0&&index<wordIndex);
+    });
+    forEachKaraokePunct(function(span,index){
         span.classList.toggle('is-spoken',wordIndex>=0&&index<wordIndex);
     });
     if(wordIndex>=0&&karaokeWordSpans[wordIndex]){
@@ -5873,6 +5951,7 @@ function karaokeTick(){
             if(karaokeLastSpokenIndex>=0&&karaokeWordSpans[karaokeLastSpokenIndex]){
                 karaokeWordSpans[karaokeLastSpokenIndex].classList.remove('is-speaking');
                 karaokeWordSpans[karaokeLastSpokenIndex].classList.add('is-spoken');
+                setKaraokePunctSpoken(karaokeLastSpokenIndex,true);
             }
             if(wordIndex>=0&&wordIndex<karaokeLastSpokenIndex){
                 syncKaraokeHighlight();
@@ -5881,10 +5960,12 @@ function karaokeTick(){
                     if(karaokeWordSpans[i]){
                         karaokeWordSpans[i].classList.remove('is-speaking');
                         karaokeWordSpans[i].classList.add('is-spoken');
+                        setKaraokePunctSpoken(i,true);
                     }
                 }
                 karaokeWordSpans[wordIndex].classList.add('is-speaking');
                 karaokeWordSpans[wordIndex].classList.remove('is-spoken');
+                setKaraokePunctSpoken(wordIndex,false);
                 karaokeLastSpokenIndex=wordIndex;
             }
         }
@@ -5908,8 +5989,25 @@ function stopKaraokeLoop(){
     }
 }
 
+function normalizeKaraokeTimepoints(timepoints){
+    if(!Array.isArray(timepoints))return [];
+    return timepoints.map(function(item){
+        return {
+            index:parseInt(item&&item.index,10),
+            time:parseFloat(item&&item.time),
+            sync_version:item&&item.sync_version
+        };
+    }).filter(function(item){
+        return !isNaN(item.index)&&isFinite(item.time)&&item.index>=0&&item.time>=0;
+    }).sort(function(a,b){
+        return a.time-b.time;
+    });
+}
+
 function applyKaraokePayload(payload){
     if(!payload||!payload.audio_b64||!Array.isArray(payload.timepoints)||!payload.timepoints.length)return false;
+    var normalizedTimepoints=normalizeKaraokeTimepoints(payload.timepoints);
+    if(!normalizedTimepoints.length)return false;
     var binary=atob(payload.audio_b64);
     var bytes=new Uint8Array(binary.length);
     for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
@@ -5919,7 +6017,7 @@ function applyKaraokePayload(payload){
     currentStoryNarrationB64=payload.audio_b64;
     if(currentStory){
         currentStory.audio_url=currentStoryAudioUrl;
-        currentStory.timepoints=payload.timepoints.slice().sort(function(a,b){return (a.time||0)-(b.time||0);});
+        currentStory.timepoints=normalizedTimepoints;
         currentStory.has_audio=true;
         currentStory.has_narration=true;
     }
@@ -5938,40 +6036,52 @@ function applyKaraokePayload(payload){
 async function ensureKaraokeData(){
     if(!currentStory||!Array.isArray(currentStory.word_data)||!currentStory.word_data.length)return false;
     if(currentStory.audio_url&&Array.isArray(currentStory.timepoints)&&currentStory.timepoints.length)return true;
+    if(karaokeDataPromise)return await karaokeDataPromise;
+    var storyAtStart=currentStory;
     var token=++karaokeFetchToken;
-    try{
-        if(currentStory.id&&currentStory.has_narration){
-            var cached=await fetch('/api/stories/'+currentStory.id+'/narration');
-            if(token!==karaokeFetchToken)return false;
-            if(cached.ok){
-                var cachedPayload=await cached.json();
+    var promise=(async function(){
+        try{
+            if(storyAtStart.id&&storyAtStart.has_narration){
+                var cached=await fetch('/api/stories/'+storyAtStart.id+'/narration');
                 if(token!==karaokeFetchToken)return false;
-                if(applyKaraokePayload(cachedPayload))return true;
+                if(cached.ok){
+                    var cachedPayload=await cached.json();
+                    if(token!==karaokeFetchToken||currentStory!==storyAtStart)return false;
+                    if(applyKaraokePayload(cachedPayload))return true;
+                }
             }
+            setStoryStatus('Preparing word sync...','working');
+            var response=await fetch('/api/stories/tts-marked',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    story_text:storyAtStart.story_text||'',
+                    word_data:storyAtStart.word_data||[],
+                    language:storyAtStart.target_lang||$('storyTargetLang').value,
+                    story_id:storyAtStart.id||null
+                })
+            });
+            if(token!==karaokeFetchToken)return false;
+            var payload=await response.json();
+            if(!response.ok||payload.error)throw new Error(payload.error||'Could not prepare word sync.');
+            if(token!==karaokeFetchToken||currentStory!==storyAtStart)return false;
+            if(!applyKaraokePayload(payload))throw new Error('Could not prepare word sync.');
+            setStoryStatus('Narration with word sync ready.','ready');
+            return true;
+        }catch(e){
+            if(token===karaokeFetchToken&&currentStory===storyAtStart){
+                setStoryStatus(e.message||'Could not prepare word sync.','error');
+            }
+            return false;
         }
-        setStoryStatus('Preparing word sync...','working');
-        var words=currentStory.word_data.map(function(item){return String((item&&item.word)||'');});
-        var response=await fetch('/api/stories/tts-marked',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({
-                words:words,
-                language:currentStory.target_lang||$('storyTargetLang').value,
-                story_id:currentStory.id||null
-            })
-        });
-        if(token!==karaokeFetchToken)return false;
-        var payload=await response.json();
-        if(!response.ok||payload.error)throw new Error(payload.error||'Could not prepare word sync.');
-        if(token!==karaokeFetchToken)return false;
-        if(!applyKaraokePayload(payload))throw new Error('Could not prepare word sync.');
-        setStoryStatus('Narration with word sync ready.','ready');
-        return true;
-    }catch(e){
-        if(token===karaokeFetchToken){
-            setStoryStatus(e.message||'Could not prepare word sync.','error');
+    })();
+    karaokeDataPromise=promise;
+    try{
+        return await promise;
+    }finally{
+        if(karaokeDataPromise===promise){
+            karaokeDataPromise=null;
         }
-        return false;
     }
 }
 
@@ -6271,8 +6381,11 @@ if(storyAudioPlayer){
         stopKaraokeLoop();
         if(karaokeEnabled){
             refreshKaraokeWordSpans();
-            karaokeWordSpans.forEach(function(span){
+            forEachKaraokeSpan(function(span){
                 span.classList.remove('is-speaking');
+                span.classList.add('is-spoken');
+            });
+            forEachKaraokePunct(function(span){
                 span.classList.add('is-spoken');
             });
         }
