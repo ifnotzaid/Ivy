@@ -1,19 +1,17 @@
 
             .logo img {
-                filter: brightness(1.28) saturate(1.18) contrast(1.12) drop-shadow(0 0 14px rgba(74,222,128,0.12));
+                filter: brightness(1.28) saturate(1.18) contrast(1.12);
                 opacity: 1;
             }
             .vulgar-warning {
                 display: none;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
                 color: #ef4444;
                 background: rgba(239,68,68,0.08);
                 border: 1px solid rgba(239,68,68,0.2);
                 padding: 3px 10px;
                 border-radius: 999px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
                 .vulgar-warning.visible {
@@ -33,7 +31,7 @@
                 --border-lit: #243530;
                 --text: #e8f0ec;
                 --text-2: #8fa89a;
-                --text-3: #4a6356;
+                --text-3: #7a9486;
                 --ivy: #4ade80;
                 --ivy-dim: rgba(74,222,128,0.08);
                 --ivy-mid: rgba(74,222,128,0.15);
@@ -51,7 +49,7 @@
                 --danger: #ef4444;
                 --danger-bg: rgba(239,68,68,0.08);
                 --font: 'Outfit', sans-serif;
-                --mono: 'JetBrains Mono', monospace;
+                --mono: 'Outfit', sans-serif; /* figures use the text face with tabular digits */
                 --r: 14px;
                 --r-sm: 10px;
             }
@@ -66,8 +64,8 @@
                 --border: #cfdfd3;
                 --border-lit: #b9d0bf;
                 --text: #183126;
-                --text-2: #55715f;
-                --text-3: #819a8a;
+                --text-2: #3d5848;
+                --text-3: #5a7563;
                 --ivy: #0f7a43;
                 --ivy-dim: rgba(15,122,67,0.1);
                 --ivy-mid: rgba(15,122,67,0.18);
@@ -133,41 +131,10 @@
                 transition: background-color 0.28s ease, border-color 0.28s ease, color 0.28s ease, box-shadow 0.28s ease, opacity 0.28s ease;
             }
 
-            .glow {
-                position: fixed;
-                width: 700px;
-                height: 700px;
-                border-radius: 50%;
-                filter: blur(140px);
-                opacity: 0.028;
-                pointer-events: none;
-            }
 
-            .glow-1 {
-                top: -340px;
-                left: -320px;
-                background: #0f1f17;
-                opacity: 0.012;
-            }
 
-            .glow-2 {
-                top: 80px;
-                right: -220px;
-                width: 760px;
-                height: 760px;
-                background: radial-gradient(circle, rgba(34,197,94,0.38) 0%, rgba(22,101,52,0.18) 42%, rgba(4,8,6,0) 72%);
-                opacity: 0.07;
-            }
 
-            body[data-theme="light"] .glow-1 {
-                background: radial-gradient(circle, rgba(255,255,255,0.72) 0%, rgba(237,244,238,0) 72%);
-                opacity: 0.24;
-            }
 
-            body[data-theme="light"] .glow-2 {
-                background: radial-gradient(circle, rgba(15,122,67,0.14) 0%, rgba(15,122,67,0.09) 44%, rgba(237,244,238,0) 76%);
-                opacity: 0.42;
-            }
 
             .container {
                 max-width: 1060px;
@@ -229,7 +196,7 @@
                 padding: 8px 18px;
                 border-radius: 7px;
                 cursor: pointer;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
             }
 
                 .mode-tab:hover {
@@ -257,7 +224,7 @@
                 font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
             }
 
                 .theme-toggle:hover {
@@ -301,9 +268,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
                 position: relative;
-                text-transform: uppercase;
             }
 
                 .avatar-btn:hover {
@@ -366,7 +332,7 @@
                 font-size: 13px;
                 font-weight: 500;
                 color: var(--text-2);
-                transition: all 0.15s;
+                transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s, transform 0.15s;
                 border: none;
                 background: none;
                 width: 100%;
@@ -466,8 +432,6 @@
                 font-weight: 500;
                 color: var(--text-2);
                 margin-bottom: 6px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
             .form-input {
@@ -528,10 +492,15 @@
                 color: var(--text-3);
             }
 
-                .form-switch a {
+                .form-switch a,
+                .form-switch .link-btn {
                     color: var(--ivy);
                     cursor: pointer;
                     text-decoration: none;
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    font: inherit;
                 }
 
             /* Vocab panel */
@@ -563,7 +532,7 @@
                 flex-shrink: 0;
             }
 
-                .vocab-panel-header h3 {
+                .vocab-panel-header h2 {
                     font-size: 16px;
                     font-weight: 600;
                 }
@@ -590,11 +559,11 @@
                 border-radius: 999px;
                 color: var(--text-3);
                 font-family: var(--font);
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 500;
                 padding: 6px 14px;
                 cursor: pointer;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
             }
 
                 .filter-chip:hover {
@@ -653,16 +622,14 @@
             }
 
             .vocab-tag {
-                font-size: 9px;
+                font-size: 12px;
                 font-weight: 600;
                 padding: 2px 7px;
                 border-radius: 4px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
             .vocab-sentence {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
                 margin-top: 8px;
                 font-style: italic;
@@ -707,10 +674,8 @@
             }
 
             .stat-label {
-                font-size: 10px;
+                font-size: 12px;
                 color: var(--text-3);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
                 margin-top: 2px;
             }
 
@@ -744,7 +709,7 @@
                 font-weight: 500;
                 padding: 10px 22px;
                 cursor: pointer;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
                 appearance: none;
                 outline: none;
                 min-width: 130px;
@@ -770,7 +735,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s;
+                transition: background-color 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s, opacity 0.3s, transform 0.3s;
                 flex-shrink: 0;
             }
 
@@ -796,7 +761,7 @@
                 font-weight: 500;
                 padding: 8px 16px;
                 cursor: pointer;
-                transition: all 0.25s;
+                transition: background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s, opacity 0.25s, transform 0.25s;
                 color: var(--text-3);
             }
 
@@ -826,10 +791,8 @@
             /* Restyle badge */
             .restyle-badge {
                 display: none;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 1px;
                 color: var(--ivy);
                 background: var(--ivy-dim);
                 border: 1px solid rgba(74,222,128,0.2);
@@ -912,7 +875,7 @@
                 min-height: 200px;
                 position: relative;
                 overflow: visible;
-                transition: all 0.4s ease;
+                transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
             }
 
                 .panel:first-child {
@@ -955,7 +918,7 @@
                 }
 
                 .panel-output.empty::before {
-                    content: "Translation appears here...";
+                    content: "Translation appears here…";
                     display: block;
                     font-size: 20px;
                     font-weight: 400;
@@ -984,7 +947,7 @@
             }
 
             .char-count {
-                font-size: 11px;
+                font-size: 12px;
                 font-family: var(--mono);
                 color: var(--text-3);
             }
@@ -993,7 +956,7 @@
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
                 opacity: 0;
                 transition: opacity 0.3s;
@@ -1017,7 +980,7 @@
                 cursor: pointer;
                 padding: 4px 8px;
                 border-radius: 6px;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
             }
 
                 .clear-btn:hover {
@@ -1053,10 +1016,10 @@
                 background: var(--card);
                 color: var(--text-2);
                 font-family: var(--font);
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.18s ease;
+                transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
             }
 
                 .copy-translation-btn.visible {
@@ -1148,7 +1111,7 @@
                 cursor: pointer;
                 font-size: 16px;
                 line-height: 1;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
                 animation: outputActionIn 0.16s ease-out;
             }
 
@@ -1372,7 +1335,7 @@
                 margin: 0 -1px;
                 border-radius: 4px;
                 cursor: pointer;
-                transition: all 0.15s;
+                transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s, transform 0.15s;
                 position: relative;
                 border-bottom: 1.5px solid transparent;
             }
@@ -1522,7 +1485,7 @@
                 cursor: pointer;
                 padding: 0;
                 flex: 0 0 auto;
-                transition: all 0.18s ease;
+                transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
             }
 
                 .tooltip-speak:hover {
@@ -1541,14 +1504,14 @@
             }
 
             .tooltip-base {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
                 font-family: var(--mono);
                 margin-top: 2px;
             }
 
             .tooltip-cefr {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
                 padding: 2px 8px;
                 border-radius: 999px;
@@ -1586,12 +1549,10 @@
             }
 
             .tooltip-tag {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 500;
                 padding: 3px 8px;
                 border-radius: 6px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
             .tag-pos {
@@ -1616,13 +1577,11 @@
                 border-radius: 6px;
                 color: var(--ivy);
                 font-family: var(--font);
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 600;
                 padding: 6px 12px;
                 cursor: pointer;
-                transition: all 0.2s;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
             }
 
                 .tooltip-save:hover {
@@ -1647,7 +1606,7 @@
                 display: flex;
                 align-items: center;
                 gap: 5px;
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
             }
 
@@ -1683,7 +1642,7 @@
                 border: 1px solid var(--border);
                 border-radius: var(--r);
                 padding: 20px;
-                transition: all 0.25s;
+                transition: background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s, opacity 0.25s, transform 0.25s;
             }
 
                 .compare-card:hover {
@@ -1692,10 +1651,8 @@
 
             .compare-tag {
                 display: inline-block;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 1.2px;
                 padding: 4px 12px;
                 border-radius: 999px;
                 margin-bottom: 14px;
@@ -1739,10 +1696,8 @@
             }
 
             .analysis-title {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
                 color: var(--text-3);
                 margin-bottom: 16px;
             }
@@ -1776,7 +1731,7 @@
             }
 
             .bar-pct {
-                font-size: 11px;
+                font-size: 12px;
                 font-family: var(--mono);
                 color: var(--text-3);
                 min-width: 32px;
@@ -1842,7 +1797,7 @@
                 margin-bottom: 18px;
             }
 
-                .practice-card-head h3 {
+                .practice-card-head h2 {
                     font-size: 18px;
                     font-weight: 600;
                     margin-bottom: 4px;
@@ -1868,7 +1823,7 @@
             }
 
             .practice-label {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
             }
 
@@ -1971,7 +1926,7 @@
                     object-fit: contain;
                 }
 
-            .practice-empty h3 {
+            .practice-empty h2 {
                 font-size: 20px;
                 margin-bottom: 10px;
             }
@@ -2160,7 +2115,7 @@
                 background: var(--border);
                 color: var(--text-3);
                 font-family: var(--mono);
-                font-size: 11px;
+                font-size: 12px;
             }
 
             .practice-option.is-correct .practice-option-num {
@@ -2358,7 +2313,7 @@
                 margin-bottom: 14px;
             }
 
-                .story-card-title h3 {
+                .story-card-title h2 {
                     font-size: 16px;
                     font-weight: 600;
                 }
@@ -2446,17 +2401,15 @@
 
             .story-personalize-hint {
                 display: block;
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
                 margin-top: 2px;
             }
 
             .story-personalize-badge {
                 display: none;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
-                letter-spacing: 0.05em;
-                text-transform: uppercase;
                 padding: 3px 8px;
                 border-radius: 999px;
                 background: var(--ivy-mid);
@@ -2699,10 +2652,8 @@
                 }
 
             .story-label {
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 600;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
                 color: var(--text-2);
             }
 
@@ -2877,10 +2828,8 @@
             }
 
             .story-badge {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
                 border-radius: 999px;
                 padding: 4px 10px;
             }
@@ -2928,13 +2877,11 @@
                 border-top: 1px solid var(--border);
             }
 
-                .story-section h4 {
+                .story-section h3 {
                     font-size: 13px;
                     font-weight: 600;
                     margin-bottom: 10px;
                     color: var(--text-2);
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
                 }
 
             .story-summary {
@@ -3087,11 +3034,9 @@
                 }
 
             .flashcard-set-label {
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 600;
                 color: var(--text-3);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
                 white-space: nowrap;
             }
 
@@ -3143,13 +3088,11 @@
                 border-radius: 999px;
                 color: var(--text-3);
                 font-family: var(--font);
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 600;
                 padding: 7px 14px;
                 cursor: pointer;
-                transition: all 0.2s;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
             }
 
                 .flashcard-filter:hover {
@@ -3174,7 +3117,7 @@
                 justify-content: center;
                 padding: 40px;
                 cursor: pointer;
-                transition: all 0.3s;
+                transition: background-color 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s, opacity 0.3s, transform 0.3s;
             }
 
                 .flashcard:hover {
@@ -3182,10 +3125,8 @@
                 }
 
             .flashcard-lang {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 1.5px;
                 color: var(--text-3);
                 margin-bottom: 16px;
             }
@@ -3259,7 +3200,7 @@
                 font-weight: 500;
                 padding: 10px 24px;
                 cursor: pointer;
-                transition: all 0.2s;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s, transform 0.2s;
                 background: var(--card);
                 color: var(--text-2);
             }
@@ -3313,7 +3254,7 @@
                 padding: 60px 20px;
             }
 
-                .flashcard-done h3 {
+                .flashcard-done h2 {
                     font-size: 20px;
                     font-weight: 600;
                     margin-bottom: 8px;
@@ -3328,7 +3269,7 @@
             .footer {
                 text-align: center;
                 padding: 26px 0 10px;
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-3);
                 letter-spacing: 0.7px;
                 opacity: 0.82;
@@ -3535,3 +3476,162 @@
                     right: -100%;
                 }
             }
+
+
+/* ── Polish: shared interaction and accessibility rules ───────────────── */
+
+/* Keyboard focus: a clear ring for keyboard users, nothing on mouse click. */
+:focus-visible {
+    outline: 2px solid var(--ivy);
+    outline-offset: 2px;
+}
+.form-input:focus-visible,
+.lang-chip:focus-visible,
+.story-field:focus-visible,
+.story-select:focus-visible,
+.practice-select:focus-visible,
+.flashcard-set-select:focus-visible,
+.panel-input:focus-visible {
+    outline: none;
+    border-color: var(--ivy);
+    box-shadow: 0 0 0 3px var(--ivy-mid);
+}
+.panel-input:focus-visible {
+    box-shadow: none;
+}
+.translator:focus-within {
+    border-color: var(--border-lit);
+}
+
+/* Numbers that change or line up use equal-width digits. */
+.char-count,
+.bar-pct,
+.stat-num,
+.flashcard-progress,
+.practice-progress-text,
+.practice-results-score,
+.practice-score-stat {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Native selects follow the theme (Windows dark mode). */
+select {
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+/* Touch: no double-tap zoom delay, no grey flash. */
+button,
+a,
+select,
+.word-span,
+.saved-story-card,
+.story-personalize {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.logo {
+    margin: 0;
+    font-size: inherit;
+}
+
+.pos-hint {
+    margin-left: auto;
+    color: var(--text-3);
+}
+
+/* Words in a translation can be focused and tapped to open their details. */
+.word-span:focus-visible {
+    outline: 2px solid var(--ivy);
+    outline-offset: 1px;
+    border-radius: 4px;
+}
+
+.saved-story-card:focus-visible {
+    outline-offset: 0;
+}
+
+/* Phone header: logo and controls on one row, modes on their own scrollable row. */
+@media (max-width: 720px) {
+    .header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "logo controls"
+            "tabs tabs";
+        align-items: center;
+        gap: 14px;
+    }
+    .header-right {
+        display: contents;
+    }
+    .logo {
+        grid-area: logo;
+    }
+    .header-controls {
+        grid-area: controls;
+        margin-left: 0;
+    }
+    .mode-tabs {
+        grid-area: tabs;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+    }
+    .mode-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    .mode-tab {
+        flex: 1 0 auto;
+        padding: 10px 14px;
+        min-height: 40px;
+    }
+    .logo img {
+        height: 40px;
+    }
+}
+
+.vocab-panel,
+.modal-overlay,
+.ivy-explanation-panel {
+    overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+a.dropdown-item {
+    text-decoration: none;
+}
+
+/* Closed drawers slide out with transform and are hidden from keyboard and screen readers. */
+.vocab-panel {
+    right: 0;
+    transform: translateX(105%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0s linear 0.3s;
+}
+.vocab-panel.open {
+    right: 0;
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.3s ease, visibility 0s;
+}
+.ivy-explanation-panel {
+    visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s linear 0.32s;
+}
+.ivy-explanation-panel.open {
+    visibility: visible;
+    transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1), visibility 0s;
+}
