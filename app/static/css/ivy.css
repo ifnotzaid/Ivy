@@ -36,8 +36,8 @@
                 --ivy-dim: rgba(74,222,128,0.08);
                 --ivy-mid: rgba(74,222,128,0.15);
                 --ivy-deep: #166534;
-                --formal: #a78bfa;
-                --formal-bg: rgba(167,139,250,0.06);
+                --formal: #22d3ee;
+                --formal-bg: rgba(34,211,238,0.06);
                 --casual: #fb923c;
                 --casual-bg: rgba(251,146,60,0.06);
                 --neutral: #64748b;
@@ -70,8 +70,8 @@
                 --ivy-dim: rgba(15,122,67,0.1);
                 --ivy-mid: rgba(15,122,67,0.18);
                 --ivy-deep: #166534;
-                --formal: #8b5cf6;
-                --formal-bg: rgba(139,92,246,0.1);
+                --formal: #0e7490;
+                --formal-bg: rgba(14,116,144,0.1);
                 --casual: #ea7a16;
                 --casual-bg: rgba(234,122,22,0.1);
                 --neutral: #64748b;
@@ -1561,8 +1561,8 @@
             }
 
             .tag-case {
-                background: rgba(167,139,250,0.1);
-                color: var(--formal);
+                background: var(--surface);
+                color: var(--text-2);
             }
 
             .tag-gender {
@@ -2429,7 +2429,7 @@
                 margin-bottom: 16px;
                 border: 1px solid rgba(74,222,128,0.2);
                 border-radius: var(--r);
-                background: linear-gradient(135deg, var(--ivy-dim), rgba(167,139,250,0.06));
+                background: var(--ivy-dim);
             }
 
             .story-hero-title {
@@ -2840,8 +2840,8 @@
                 }
 
                 .story-badge.theme {
-                    background: rgba(167,139,250,0.1);
-                    color: var(--formal);
+                    background: var(--surface);
+                    color: var(--text-2);
                 }
 
                 .story-badge.length {
