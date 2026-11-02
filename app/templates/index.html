@@ -4175,7 +4175,7 @@ $('tgtLang').addEventListener('change',()=>{checkRestyleMode();rescheduleForCurr
 async function checkAuth(){try{const r=await fetch('/api/auth/me');const d=await r.json();if(d.user){currentUser=d.user;}updateAuthUI();loadSavedStories();refreshVocabCounts();if(currentMode==='practice')initPracticeMode();if(currentMode==='flashcards')loadFlashcards(currentFlashcardLang);}catch(e){loadSavedStories();refreshVocabCounts();if(currentMode==='practice')initPracticeMode();}}
 function updateAuthUI(){
     const btn=$('avatarBtn');
-    if(currentUser){btn.textContent=currentUser.display_name.substring(0,2).toUpperCase();btn.classList.add('logged-in');$('dropdownHeader').innerHTML=`<div class="dropdown-name">${currentUser.display_name}</div><div class="dropdown-email">${currentUser.email}</div>`;$('menuLogin').style.display='none';$('menuLogout').style.display='flex';}
+    if(currentUser){btn.textContent=currentUser.display_name.substring(0,2).toUpperCase();btn.classList.add('logged-in');$('dropdownHeader').innerHTML=`<div class="dropdown-name">${escapeHtml(currentUser.display_name)}</div><div class="dropdown-email">${escapeHtml(currentUser.email)}</div>`;$('menuLogin').style.display='none';$('menuLogout').style.display='flex';}
     else{btn.textContent='Guest';btn.classList.remove('logged-in');$('dropdownHeader').innerHTML='<div class="dropdown-name">Guest</div><div class="dropdown-email">Not logged in</div>';$('menuLogin').style.display='flex';$('menuLogout').style.display='none';}
 }
 function openAuth(){$('authModal').classList.add('open');showLogin();}
@@ -4204,7 +4204,7 @@ async function loadVocab(lang=''){
     const sr=await fetch('/api/vocab/stats');const stats=await sr.json();
     $('vocabStats').innerHTML='<div class="stat-box"><div class="stat-num">'+stats.total+'</div><div class="stat-label">Words</div></div>'+Object.entries(stats.by_language||{}).map(function(entry){return'<div class="stat-box"><div class="stat-num">'+entry[1]+'</div><div class="stat-label">'+(langNames[entry[0]]||entry[0])+'</div></div>';}).join('');
     if(d.words.length===0){$('vocabList').innerHTML='<div class="vocab-empty">No words saved yet</div>';return;}
-    $('vocabList').innerHTML=d.words.map(function(w){var tags='<span class="vocab-tag tag-pos">'+(w.pos||'')+'</span>';if(w.grammatical_case)tags+='<span class="vocab-tag tag-case">'+w.grammatical_case+'</span>';if(w.difficulty)tags+='<span class="vocab-tag tooltip-cefr cefr-'+w.difficulty+'">'+w.difficulty+'</span>';return'<div class="vocab-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><div class="vocab-word">'+w.word+'</div><div class="vocab-meaning">'+(w.meaning||'')+'</div></div><button class="vocab-delete" onclick="deleteVocab('+w.id+')">&times;</button></div><div class="vocab-meta">'+tags+'</div>'+(w.sentence?'<div class="vocab-sentence">'+w.sentence+'</div>':'')+'</div>';}).join('');
+    $('vocabList').innerHTML=d.words.map(function(w){var tags='<span class="vocab-tag tag-pos">'+escapeHtml(w.pos)+'</span>';if(w.grammatical_case)tags+='<span class="vocab-tag tag-case">'+escapeHtml(w.grammatical_case)+'</span>';if(w.difficulty)tags+='<span class="vocab-tag tooltip-cefr cefr-'+escapeHtml(w.difficulty)+'">'+escapeHtml(w.difficulty)+'</span>';return'<div class="vocab-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><div class="vocab-word">'+escapeHtml(w.word)+'</div><div class="vocab-meaning">'+escapeHtml(w.meaning)+'</div></div><button class="vocab-delete" onclick="deleteVocab('+w.id+')">&times;</button></div><div class="vocab-meta">'+tags+'</div>'+(w.sentence?'<div class="vocab-sentence">'+escapeHtml(w.sentence)+'</div>':'')+'</div>';}).join('');
     }catch(e){console.error(e);}
 }
 function filterVocab(el,lang){document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');});el.classList.add('active');loadVocab(lang);}
@@ -4582,9 +4582,9 @@ function clearFlashcardSetFilter(){
 
 function showFlashcard(){
     if(fcIndex>=flashcards.length){$('fcContent').innerHTML='<div class="flashcard-done"><h3>Session complete!</h3><p>Reviewed '+flashcards.length+' cards</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
-    var c=flashcards[fcIndex];var tags='';if(c.pos)tags+='<span class="vocab-tag tag-pos">'+c.pos+'</span>';if(c.grammatical_case)tags+='<span class="vocab-tag tag-case">'+c.grammatical_case+'</span>';if(c.difficulty)tags+='<span class="vocab-tag tooltip-cefr cefr-'+c.difficulty+'">'+c.difficulty+'</span>';
+    var c=flashcards[fcIndex];var tags='';if(c.pos)tags+='<span class="vocab-tag tag-pos">'+escapeHtml(c.pos)+'</span>';if(c.grammatical_case)tags+='<span class="vocab-tag tag-case">'+escapeHtml(c.grammatical_case)+'</span>';if(c.difficulty)tags+='<span class="vocab-tag tooltip-cefr cefr-'+escapeHtml(c.difficulty)+'">'+escapeHtml(c.difficulty)+'</span>';
     $('fcProgress').textContent=flashcardDeckLabel()+' - card '+(fcIndex+1)+' of '+flashcards.length;
-    $('fcContent').innerHTML='<div class="flashcard" onclick="this.classList.toggle(\'flipped\')"><div class="flashcard-lang">'+(langNames[c.target_lang]||c.target_lang)+'</div><div class="flashcard-word">'+c.word+'</div>'+(c.base_form&&c.base_form!==c.word?'<div class="flashcard-base">'+c.base_form+'</div>':'')+'<div class="flashcard-tags">'+tags+'</div><div class="flashcard-reveal">tap to reveal</div><div class="flashcard-answer"><div class="flashcard-meaning">'+(c.meaning||'—')+'</div>'+(c.sentence?'<div class="flashcard-sentence">'+c.sentence+'</div>':'')+'</div></div>';
+    $('fcContent').innerHTML='<div class="flashcard" onclick="this.classList.toggle(\'flipped\')"><div class="flashcard-lang">'+(langNames[c.target_lang]||c.target_lang)+'</div><div class="flashcard-word">'+escapeHtml(c.word)+'</div>'+(c.base_form&&c.base_form!==c.word?'<div class="flashcard-base">'+escapeHtml(c.base_form)+'</div>':'')+'<div class="flashcard-tags">'+tags+'</div><div class="flashcard-reveal">tap to reveal</div><div class="flashcard-answer"><div class="flashcard-meaning">'+escapeHtml(c.meaning||'—')+'</div>'+(c.sentence?'<div class="flashcard-sentence">'+escapeHtml(c.sentence)+'</div>':'')+'</div></div>';
     $('fcActions').style.display='flex';
     requestAnimationFrame(syncModeStageHeight);
 }
@@ -6412,7 +6412,7 @@ document.addEventListener('keydown',function(e){
             closeIvyPanel();
             return;
         }
-        closeAuth();closeVocab();clearInput();
+        closeAuth();closeVocab();closeDropdown();
     }
 });
 initTheme();
