@@ -35,9 +35,10 @@ Tokens live in `:root` (dark, the default) and `body[data-theme="light"]` at the
 
 **Data colours.** These encode meaning and are used only for that meaning:
 
-- Register: `--formal` violet, `--neutral` slate, `--casual` orange. They appear on the
-  register chips, Compare tags and tone bars. Formal is violet on purpose so the three
-  registers never read as one family; it is the only violet in the app.
+- Register: `--formal` cyan (`#22d3ee` dark, `#0e7490` light), `--neutral` slate,
+  `--casual` orange. Cool for formal, warm for casual. They appear on the register chips,
+  Compare tags and tone bars, and nowhere else: grammatical-case tags, language badges and
+  story theme badges are neutral grey so they never look like a register.
 - Part of speech: `--noun` blue, `--verb` green, `--adj` amber, `--adv` pink. Only in word
   underlines, the legend and tooltip tags.
 
@@ -45,7 +46,7 @@ Tokens live in `:root` (dark, the default) and `body[data-theme="light"]` at the
 
 - Every text colour reaches 4.5:1 on the surface it sits on. Check new greys before using them.
 - Green appears on the action and the active state, not on decoration.
-- No gradients, glows or blurred colour blobs.
+- No gradients, glows or blurred colour blobs. No violet or indigo.
 - Surfaces separate by one tone step or a 1px `--border`, not by shadows. Shadows only on
   things that float: menus, tooltips, the toast, modals.
 

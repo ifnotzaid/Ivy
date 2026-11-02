@@ -20,7 +20,7 @@ Fixed on the `frontend-redesign` branch:
 - Section 5: CSS and JS moved to `app/static/css/` and `app/static/js/`.
 
 Not changed: `confirm()` is still used before deleting a set or removing a friend (it is a
-real confirmation, just browser-styled). Formal stays violet; see `DESIGN.md`.
+real confirmation, just browser-styled). Formal changed from violet to cyan; see `DESIGN.md`.
 
 ## Overall
 
