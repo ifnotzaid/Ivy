@@ -40,3 +40,6 @@ Thumbs.db
 
 # API keys
 .env
+
+# Taste skill working files
+.taste-skill/
