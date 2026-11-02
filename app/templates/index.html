@@ -3,50 +3,52 @@
 <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ivy</title>
+        <meta name="theme-color" content="#040806">
+        <meta name="color-scheme" content="dark light">
+        <title>Ivy — style-aware translator</title>
 
         <link rel="icon" type="image/png" href="/static/favicon.png">
         <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="/static/css/ivy.css">
     </head>
 <body>
-<div class="glow glow-1"></div>
-<div class="glow glow-2"></div>
 
 <!-- Auth modal -->
 <div class="modal-overlay" id="authModal">
-<div class="modal">
-<button class="modal-close" onclick="closeAuth()">&times;</button>
+<div class="modal" role="dialog" aria-modal="true" aria-label="Log in or sign up">
+<button class="modal-close" type="button" onclick="closeAuth()" aria-label="Close">&times;</button>
 <div id="loginForm">
 <h2>Welcome back</h2>
 <p>Log in to save vocabulary and review flashcards</p>
-<div class="form-field"><label class="form-label">Email</label><input class="form-input" type="email" id="loginEmail" placeholder="you@email.com" onkeydown="submitAuthOnEnter(event,'login')"></div>
-<div class="form-field"><label class="form-label">Password</label><input class="form-input" type="password" id="loginPass" placeholder="Your password" onkeydown="submitAuthOnEnter(event,'login')"></div>
-<div class="form-error" id="loginError"></div>
-<button class="form-btn" onclick="doLogin()">Log in</button>
-<div class="form-switch">Don't have an account? <a onclick="showSignup()">Sign up</a></div>
+<div class="form-field"><label class="form-label" for="loginEmail">Email</label><input class="form-input" type="email" id="loginEmail" name="email" autocomplete="email" spellcheck="false" placeholder="you@email.com" onkeydown="submitAuthOnEnter(event,'login')"></div>
+<div class="form-field"><label class="form-label" for="loginPass">Password</label><input class="form-input" type="password" id="loginPass" name="password" autocomplete="current-password" placeholder="Your password" onkeydown="submitAuthOnEnter(event,'login')"></div>
+<div class="form-error" id="loginError" role="alert"></div>
+<button class="form-btn" type="button" onclick="doLogin()">Log in</button>
+<div class="form-switch">Don't have an account? <button type="button" class="link-btn" onclick="showSignup()">Sign up</button></div>
 </div>
 <div id="signupForm" style="display:none">
 <h2>Create account</h2>
 <p>Start building your vocabulary across languages</p>
-<div class="form-field"><label class="form-label">Name</label><input class="form-input" type="text" id="signupName" placeholder="Your name" onkeydown="submitAuthOnEnter(event,'signup')"></div>
-<div class="form-field"><label class="form-label">Email</label><input class="form-input" type="email" id="signupEmail" placeholder="you@email.com" onkeydown="submitAuthOnEnter(event,'signup')"></div>
-<div class="form-field"><label class="form-label">Password</label><input class="form-input" type="password" id="signupPass" placeholder="At least 6 characters" onkeydown="submitAuthOnEnter(event,'signup')"></div>
-<div class="form-error" id="signupError"></div>
-<button class="form-btn" onclick="doSignup()">Create account</button>
-<div class="form-switch">Already have an account? <a onclick="showLogin()">Log in</a></div>
+<div class="form-field"><label class="form-label" for="signupName">Name</label><input class="form-input" type="text" id="signupName" name="name" autocomplete="name" placeholder="Your name" onkeydown="submitAuthOnEnter(event,'signup')"></div>
+<div class="form-field"><label class="form-label" for="signupEmail">Email</label><input class="form-input" type="email" id="signupEmail" name="email" autocomplete="email" spellcheck="false" placeholder="you@email.com" onkeydown="submitAuthOnEnter(event,'signup')"></div>
+<div class="form-field"><label class="form-label" for="signupPass">Password</label><input class="form-input" type="password" id="signupPass" name="new-password" autocomplete="new-password" placeholder="At least 6 characters" onkeydown="submitAuthOnEnter(event,'signup')"></div>
+<div class="form-error" id="signupError" role="alert"></div>
+<button class="form-btn" type="button" onclick="doSignup()">Create account</button>
+<div class="form-switch">Already have an account? <button type="button" class="link-btn" onclick="showLogin()">Log in</button></div>
 </div>
 </div>
 </div>
 
 <!-- Vocab panel -->
-<div class="vocab-panel" id="vocabPanel">
-<div class="vocab-panel-header"><h3>My vocabulary</h3><button class="vocab-panel-close" onclick="closeVocab()">&times;</button></div>
+<div class="vocab-panel" id="vocabPanel" role="dialog" aria-labelledby="vocabPanelTitle">
+<div class="vocab-panel-header"><h2 id="vocabPanelTitle">My vocabulary</h2><button class="vocab-panel-close" type="button" onclick="closeVocab()" aria-label="Close vocabulary">&times;</button></div>
 <div class="vocab-stats" id="vocabStats"></div>
-<div class="vocab-filter">
+<div class="vocab-filter" role="group" aria-label="Filter by language">
 <button class="filter-chip active" onclick="filterVocab(this,'')">All</button>
 <button class="filter-chip" onclick="filterVocab(this,'tr')">Turkish</button>
 <button class="filter-chip" onclick="filterVocab(this,'ru')">Russian</button>
@@ -57,25 +59,25 @@
 
 <div class="container">
 <div class="header">
-    <div class="logo">
-<img src="/static/logo-dark.png" alt="ivy" id="siteLogo">
-</div>
+    <h1 class="logo">
+<img src="/static/logo-dark.png" alt="Ivy" id="siteLogo" width="326" height="158">
+</h1>
 <div class="header-right">
-<div class="mode-tabs">
-<button class="mode-tab active" data-mode="translate" onclick="setMode('translate')">Translate</button>
+<nav class="mode-tabs" aria-label="Modes">
+<button class="mode-tab active" data-mode="translate" aria-current="page" onclick="setMode('translate')">Translate</button>
 <button class="mode-tab" data-mode="compare" onclick="setMode('compare')">Compare</button>
 <button class="mode-tab" data-mode="stories" onclick="setMode('stories')">Stories</button>
 <button class="mode-tab" data-mode="practice" onclick="setMode('practice')">Practice</button>
 <button class="mode-tab" data-mode="flashcards" onclick="setMode('flashcards')">Flashcards</button>
-</div>
+</nav>
 <div class="header-controls">
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle color theme"><span class="theme-toggle-icon" id="themeToggleIcon">&#9728;</span></button>
 <div style="position:relative;">
-<button class="avatar-btn" id="avatarBtn" onclick="toggleUserMenu()">Guest</button>
+<button class="avatar-btn" id="avatarBtn" type="button" onclick="toggleUserMenu()" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown" aria-label="Account menu">Guest</button>
 <div class="user-dropdown" id="userDropdown">
 <div class="dropdown-header" id="dropdownHeader"><div class="dropdown-name">Guest</div><div class="dropdown-email">Not logged in</div></div>
 <button class="dropdown-item" onclick="openVocab()">My vocabulary</button>
-<button class="dropdown-item" onclick="window.location.href='/sets'">Community</button>
+<a class="dropdown-item" href="/sets">Community</a>
 <button class="dropdown-item" id="menuLogin" onclick="openAuth();closeDropdown()">Log in / Sign up</button>
 <button class="dropdown-item danger" id="menuLogout" style="display:none" onclick="doLogout()">Log out</button>
 </div>
@@ -85,14 +87,14 @@
 </div>
 
 <div class="lang-bar" id="langBar">
-<select class="lang-chip" id="srcLang"><option value="en">English</option><option value="tr">Turkish</option><option value="ru">Russian</option><option value="de">German</option></select>
-<button class="swap-btn" onclick="swapLangs()">&#8646;</button>
-<select class="lang-chip" id="tgtLang"><option value="tr">Turkish</option><option value="en">English</option><option value="ru">Russian</option><option value="de">German</option></select>
+<select class="lang-chip" id="srcLang" aria-label="Translate from"><option value="en">English</option><option value="tr">Turkish</option><option value="ru">Russian</option><option value="de">German</option></select>
+<button class="swap-btn" type="button" onclick="swapLangs()" aria-label="Swap languages">&#8646;</button>
+<select class="lang-chip" id="tgtLang" aria-label="Translate to"><option value="tr">Turkish</option><option value="en">English</option><option value="ru">Russian</option><option value="de">German</option></select>
 <span class="restyle-badge" id="restyleBadge">Restyle mode</span>
-<div class="style-chips">
-<button class="style-chip active" data-style="formal" onclick="setStyle(this)">Formal</button>
-<button class="style-chip" data-style="neutral" onclick="setStyle(this)">Neutral</button>
-<button class="style-chip" data-style="casual" onclick="setStyle(this)">Casual</button>
+<div class="style-chips" role="group" aria-label="Register">
+<button class="style-chip active" data-style="formal" aria-pressed="true" onclick="setStyle(this)">Formal</button>
+<button class="style-chip" data-style="neutral" aria-pressed="false" onclick="setStyle(this)">Neutral</button>
+<button class="style-chip" data-style="casual" aria-pressed="false" onclick="setStyle(this)">Casual</button>
 </div>
 </div>
 
@@ -100,10 +102,10 @@
 <!-- Translate -->
 <div id="translateView">
 <div class="translator" id="translatorGrid">
-<div class="panel"><textarea class="panel-input" id="inputArea" placeholder="Start typing to translate..."></textarea><div class="panel-footer"><div class="detected-badge" id="detectedBadge"><div class="detected-dot" id="detectedDot"></div><span>Detected: <strong id="detectedText"></strong></span></div><div style="display:flex;align-items:center;gap:12px;"><span class="char-count" id="charCount">0</span><button class="clear-btn" onclick="clearInput()">&#10005;</button></div></div></div>
-<div class="panel" id="outputPanel"><div class="panel-output empty" id="outputArea" data-hint="Hover translated words to inspect meanings, grammar, and save useful vocabulary."></div><div class="panel-footer"><div class="output-actions"><div class="typing-indicator" id="typingIndicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><button class="speak-btn" id="speakBtn" onclick="speakTranslation()" style="display:none;" aria-label="Listen to translation" title="Listen to translation"><img src="/static/speaker-icon-dark-128.png" alt="" id="speakerIcon"></button><button class="ivy-why-btn" id="ivyWhyBtn" onclick="askIvyWhy()" aria-label="Ask Ivy to break this sentence down" title="Ask Ivy why"><img src="/static/logo-mark-dark-128.png" alt="" id="ivyWhyLogo"></button></div><div class="output-meta-actions"><span class="vulgar-warning" id="vulgarBadge">contains profanity</span><button class="copy-translation-btn" id="copyTranslationBtn" onclick="copyTranslation()" type="button" aria-label="Copy translation" title="Copy translation">Copy</button><span class="char-count" id="outCharCount">&nbsp;</span></div></div></div>
+<div class="panel"><textarea class="panel-input" id="inputArea" aria-label="Text to translate" placeholder="Start typing to translate…"></textarea><div class="panel-footer"><div class="detected-badge" id="detectedBadge"><div class="detected-dot" id="detectedDot"></div><span>Detected: <strong id="detectedText"></strong></span></div><div style="display:flex;align-items:center;gap:12px;"><span class="char-count" id="charCount">0</span><button class="clear-btn" type="button" onclick="clearInput()" aria-label="Clear text"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div></div>
+<div class="panel" id="outputPanel"><div class="panel-output empty" id="outputArea" aria-live="polite" data-hint="Tap or hover a translated word to see its meaning and grammar, and save it to your vocabulary."></div><div class="panel-footer"><div class="output-actions"><div class="typing-indicator" id="typingIndicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><button class="speak-btn" id="speakBtn" onclick="speakTranslation()" style="display:none;" aria-label="Listen to translation" title="Listen to translation"><img src="/static/speaker-icon-dark-128.png" alt="" id="speakerIcon" width="21" height="21"></button><button class="ivy-why-btn" id="ivyWhyBtn" onclick="askIvyWhy()" aria-label="Ask Ivy to break this sentence down" title="Ask Ivy why"><img src="/static/logo-mark-dark-128.png" alt="" id="ivyWhyLogo" width="20" height="20"></button></div><div class="output-meta-actions"><span class="vulgar-warning" id="vulgarBadge">contains profanity</span><button class="copy-translation-btn" id="copyTranslationBtn" onclick="copyTranslation()" type="button" aria-label="Copy translation" title="Copy translation">Copy</button><span class="char-count" id="outCharCount">&nbsp;</span></div></div></div>
 </div>
-<div class="pos-legend" id="posLegend" style="display:none"><div class="pos-item"><div class="pos-dot" style="background:var(--noun)"></div>noun</div><div class="pos-item"><div class="pos-dot" style="background:var(--verb)"></div>verb</div><div class="pos-item"><div class="pos-dot" style="background:var(--adj)"></div>adj</div><div class="pos-item"><div class="pos-dot" style="background:var(--adv)"></div>adv</div><div class="pos-item" style="margin-left:auto;color:var(--text-3);font-size:10px;">hover words for details</div></div>
+<div class="pos-legend" id="posLegend" style="display:none"><div class="pos-item"><div class="pos-dot" style="background:var(--noun)"></div>noun</div><div class="pos-item"><div class="pos-dot" style="background:var(--verb)"></div>verb</div><div class="pos-item"><div class="pos-dot" style="background:var(--adj)"></div>adj</div><div class="pos-item"><div class="pos-dot" style="background:var(--adv)"></div>adv</div><div class="pos-item pos-hint">Tap or hover a word for details</div></div>
 <div class="analysis-row" id="analysisRow" style="display:none"><div class="analysis-card"><div class="analysis-title">Input tone</div><div id="inputBars"></div></div><div class="analysis-card"><div class="analysis-title">Output tone</div><div id="outputBars"></div></div></div>
 
 <!-- Compare results appear here in compare mode -->
@@ -120,16 +122,16 @@
 <!-- Flashcards -->
 <div class="flashcard-view" id="flashcardsView">
 <div class="flashcard-container">
-<div class="flashcard-progress" id="fcProgress"></div>
+<div class="flashcard-progress" id="fcProgress" aria-live="polite"></div>
 <div class="flashcard-set-row" id="fcSetRow" style="display:none">
 <label class="flashcard-set-label" for="fcSetSelect">Reviewing</label>
 <select class="flashcard-set-select" id="fcSetSelect" onchange="onFlashcardSetChange()">
 <option value="">All due cards</option>
 </select>
-<button class="flashcard-set-clear" id="fcSetClear" onclick="clearFlashcardSetFilter()" style="display:none" title="Show all due cards">&times;</button>
+<button class="flashcard-set-clear" id="fcSetClear" type="button" onclick="clearFlashcardSetFilter()" style="display:none" title="Show all due cards" aria-label="Show all due cards">&times;</button>
 </div>
 <div class="flashcard-filters" id="fcFilters"></div>
-<div id="fcContent"><div class="flashcard-done"><h3>Loading...</h3><p>Make sure you're logged in</p></div></div>
+<div id="fcContent"><div class="flashcard-done"><h2>Loading…</h2><p>Make sure you're logged in</p></div></div>
 <div class="flashcard-actions" id="fcActions" style="display:none">
 <button class="fc-btn wrong" onclick="reviewCard(1)">Again</button>
 <button class="fc-btn hard" onclick="reviewCard(3)">Hard</button>
@@ -144,14 +146,14 @@
 <div class="stories-shell" id="storyShell">
 <div class="story-setup-view" id="storySetupView">
 <div class="story-card">
-<div class="story-card-title"><h3>CEFR short stories</h3><div class="story-card-subtle">Pick your language and level, then let Ivy build a reading passage</div></div>
+<div class="story-card-title"><h2>CEFR short stories</h2><div class="story-card-subtle">Pick your language and level, then let Ivy build a reading passage</div></div>
 <div class="story-controls">
 <div class="story-control"><label class="story-label" for="storyTargetLang">My language</label><select class="story-select" id="storyTargetLang" onchange="saveStoryPreferences();applyPersonalizeState();"><option value="tr">Turkish</option><option value="de">German</option><option value="ru">Russian</option><option value="en">English</option></select></div>
 <div class="story-control"><label class="story-label" for="storySupportLang">Support language</label><select class="story-select" id="storySupportLang"><option value="en">English</option><option value="tr">Turkish</option><option value="de">German</option><option value="ru">Russian</option></select></div>
 <div class="story-control"><label class="story-label" for="storyLevel">My CEFR level</label><select class="story-select" id="storyLevel" onchange="saveStoryPreferences()"><option value="A1">A1</option><option value="A2" selected>A2</option><option value="B1">B1</option><option value="B2">B2</option><option value="C1">C1</option></select></div>
 <div class="story-control"><label class="story-label" for="storyLength">Length</label><select class="story-select" id="storyLength"><option value="short" selected>Short</option><option value="medium">Medium</option><option value="long">Long</option></select></div>
 <div class="story-control"><label class="story-label" for="storyStyle">Tone</label><select class="story-select" id="storyStyle"><option value="neutral" selected>Neutral</option><option value="formal">Formal</option><option value="casual">Casual</option></select></div>
-<div class="story-control span-2"><label class="story-label" for="storyTheme">Theme or scenario</label><div class="theme-row"><input class="story-field" id="storyTheme" type="text" value="daily life" placeholder="daily life, travel, friendship, food, school"><button class="story-action secondary" type="button" onclick="surpriseStoryTheme()">Surprise me</button></div></div>
+<div class="story-control span-2"><label class="story-label" for="storyTheme">Theme or scenario</label><div class="theme-row"><input class="story-field" id="storyTheme" type="text" value="daily life" placeholder="e.g. travel, friendship, food…"><button class="story-action secondary" type="button" onclick="surpriseStoryTheme()">Surprise me</button></div></div>
 </div>
 <div class="story-personalize is-disabled" id="storyPersonalize" onclick="togglePersonalize()" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePersonalize();}" role="checkbox" aria-checked="false" tabindex="0">
 <div class="story-personalize-toggle" aria-hidden="true"></div>
@@ -160,12 +162,12 @@
 </div>
 <div class="story-actions">
 <button class="story-action primary" id="generateStoryBtn" onclick="generateStory()">Generate story</button>
-<span class="story-status" id="storyStatus">Choose a level and theme, then generate.</span>
+<span class="story-status" id="storyStatus" role="status">Choose a level and theme, then generate.</span>
 </div>
 </div>
 
 <div class="story-card">
-<div class="story-card-title"><h3>Saved stories</h3><div class="story-card-subtle">Log in to keep a personal reading shelf</div></div>
+<div class="story-card-title"><h2>Saved stories</h2><div class="story-card-subtle" id="savedStoriesSubtle">Log in to keep a personal reading shelf</div></div>
 <div class="saved-stories-list" id="savedStoriesList"><div class="story-empty">Log in to save stories for later review.</div></div>
 </div>
 </div>
@@ -174,26 +176,26 @@
 <div class="story-card">
 <div class="story-reader-header">
 <button class="story-action" onclick="showStorySetup()">Generate story</button>
-<div class="story-reader-actions"><button type="button" class="story-action story-audio-transport" id="googleTtsBtn" onclick="playStoryAudio('google')" aria-label="Play audio" title="Play audio"></button><button type="button" class="story-action story-audio-jump" id="storyBackFiveBtn" onclick="seekStoryAudio(-5)">-5s</button><input id="storyAudioProgress" class="story-audio-progress" type="range" min="0" max="100" value="0" step="0.1" oninput="scrubStoryAudio(this.value)"><button type="button" class="story-action story-audio-jump" id="storyForwardFiveBtn" onclick="seekStoryAudio(5)">+5s</button><select class="story-select story-speed-select" id="storyPlaybackRate" onchange="updateStoryAudioPlaybackRate()" aria-label="Story playback speed"><option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option></select><button type="button" class="story-action" id="saveStoryBtn" onclick="saveCurrentStory()" disabled>Save story</button></div>
+<div class="story-reader-actions"><button type="button" class="story-action story-audio-transport" id="googleTtsBtn" onclick="playStoryAudio('google')" aria-label="Play audio" title="Play audio"></button><button type="button" class="story-action story-audio-jump" id="storyBackFiveBtn" onclick="seekStoryAudio(-5)" aria-label="Back 5 seconds">−5s</button><input id="storyAudioProgress" class="story-audio-progress" type="range" aria-label="Audio position" min="0" max="100" value="0" step="0.1" oninput="scrubStoryAudio(this.value)"><button type="button" class="story-action story-audio-jump" id="storyForwardFiveBtn" onclick="seekStoryAudio(5)" aria-label="Forward 5 seconds">+5s</button><select class="story-select story-speed-select" id="storyPlaybackRate" onchange="updateStoryAudioPlaybackRate()" aria-label="Story playback speed"><option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option></select><button type="button" class="story-action" id="saveStoryBtn" onclick="saveCurrentStory()" disabled>Save story</button></div>
 </div>
-<div class="story-feedback-row"><div class="story-status story-status-reader" id="storyReaderStatus">Choose a level and theme, then generate.</div><button type="button" class="story-karaoke-toggle is-disabled" id="storyKaraokeToggle" onclick="toggleStoryKaraoke()" aria-pressed="false" title="Highlight each word as it is spoken"><span class="karaoke-dot" aria-hidden="true"></span><span>Sync words</span></button></div>
+<div class="story-feedback-row"><div class="story-status story-status-reader" id="storyReaderStatus" role="status">Choose a level and theme, then generate.</div><button type="button" class="story-karaoke-toggle is-disabled" id="storyKaraokeToggle" onclick="toggleStoryKaraoke()" aria-pressed="false" title="Highlight each word as it is spoken"><span class="karaoke-dot" aria-hidden="true"></span><span>Sync words</span></button></div>
 <audio class="story-audio-player" id="storyAudioPlayer" preload="none"></audio>
 <div class="story-audio-note"></div>
 <div class="story-meta" id="storyMeta"><span class="story-badge level">A2</span><span class="story-badge theme">daily life</span><span class="story-badge length">short</span><span class="story-badge style">neutral</span></div>
 <div class="story-title" id="storyTitle">Your next reading passage</div>
 <div class="story-text empty" id="storyText">Generate a story to get a CEFR-matched reading passage with hoverable word analysis, support-language summary, vocabulary focus, and quick comprehension checks.</div>
 <div class="story-section">
-<h4>Support summary</h4>
+<h3>Support summary</h3>
 <div class="story-summary" id="storySummary">The summary will appear here after generation.</div>
 </div>
 <div class="story-section">
-<h4>Comprehension</h4>
+<h3>Comprehension</h3>
 <div class="story-questions" id="storyQuestions"><div class="story-empty">Three quick check questions will appear here.</div></div>
 </div>
 </div>
 
 <div class="story-card">
-<div class="story-card-title"><h3>Focus vocabulary</h3><div class="story-card-subtle">Use hover tooltips in the story to save useful words</div></div>
+<div class="story-card-title"><h2>Focus vocabulary</h2><div class="story-card-subtle">Use hover tooltips in the story to save useful words</div></div>
 <div class="story-vocab-list" id="storyVocab"><div class="story-empty">Vocabulary targets will appear here after generation.</div></div>
 </div>
 </div>
@@ -205,7 +207,7 @@
 <div class="practice-shell">
 <div class="practice-setup-card" id="practiceSetup">
 <div class="practice-card-head">
-<div><h3>Cloze practice</h3><div class="practice-card-subtle">Fill in blanks from your saved stories. Each answer can update your review schedule.</div></div>
+<div><h2>Cloze practice</h2><div class="practice-card-subtle">Fill in blanks from your saved stories. Each answer can update your review schedule.</div></div>
 </div>
 <div class="practice-controls">
 <div class="practice-control"><label class="practice-label" for="practiceLang">Language</label><select class="practice-select" id="practiceLang" onchange="onPracticeLangChange()"><option value="tr">Turkish</option><option value="de">German</option><option value="ru">Russian</option><option value="en">English</option></select></div>
@@ -214,12 +216,12 @@
 <div class="practice-control"><label class="practice-label" for="practiceLength">Length</label><select class="practice-select" id="practiceLength"><option value="10" selected>10 questions</option><option value="20">20 questions</option><option value="25">25 questions</option></select></div>
 </div>
 <div class="practice-actions"><button class="practice-start-btn" id="practiceStartBtn" type="button" onclick="startPracticeQuiz()">Start practice</button></div>
-<div class="practice-status" id="practiceStatus"></div>
+<div class="practice-status" id="practiceStatus" role="status"></div>
 </div>
 
 <div class="practice-empty" id="practiceEmpty" style="display:none">
-<div class="practice-empty-icon"><img src="/static/logo-mark-dark-128.png" alt="" id="practiceEmptyLogo"></div>
-<h3>No practice material yet</h3>
+<div class="practice-empty-icon"><img src="/static/logo-mark-dark-128.png" alt="" id="practiceEmptyLogo" width="40" height="40"></div>
+<h2>No practice material yet</h2>
 <p>Generate a story, save it, and Ivy will turn useful words from that story into cloze questions.</p>
 <button class="practice-start-btn" type="button" onclick="setMode('stories')">Generate a story</button>
 </div>
@@ -234,7 +236,7 @@
 <div class="practice-sentence" id="practiceSentence"></div>
 <div class="practice-translation" id="practiceTranslation"></div>
 <div class="practice-options" id="practiceOptions"></div>
-<div class="practice-feedback" id="practiceFeedback"></div>
+<div class="practice-feedback" id="practiceFeedback" aria-live="polite"></div>
 </div>
 <div class="practice-quiz-foot">
 <div class="practice-score-line"><span class="practice-score-stat"><span class="practice-score-dot is-correct"></span><span id="practiceCorrectCount">0</span> correct</span><span class="practice-score-stat"><span class="practice-score-dot is-wrong"></span><span id="practiceWrongCount">0</span> missed</span></div>
@@ -255,9 +257,9 @@
 <div class="footer">ivy &mdash; style-aware translator &mdash; capstone 2026</div>
 </div>
 
-<div class="ivy-explanation-panel" id="ivyExplanationPanel" aria-hidden="true">
+<div class="ivy-explanation-panel" id="ivyExplanationPanel" role="complementary" aria-label="Ivy explains" aria-hidden="true">
 <div class="ivy-panel-header">
-<div class="ivy-panel-title"><img src="/static/logo-mark-dark-128.png" alt="" id="ivyPanelLogo"><span>Ivy explains</span></div>
+<div class="ivy-panel-title"><img src="/static/logo-mark-dark-128.png" alt="" id="ivyPanelLogo" width="20" height="20"><span>Ivy explains</span></div>
 <button class="ivy-panel-close" onclick="closeIvyPanel()" aria-label="Close explanation">&times;</button>
 </div>
 <div class="ivy-panel-sentence" id="ivyPanelSentence"></div>

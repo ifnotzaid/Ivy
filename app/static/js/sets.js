@@ -7,9 +7,12 @@ var addWordsState = { available: [], alreadyIds: new Set(), selected: new Set(),
 // Tabs
 function showTab(tab) {
     activeTab = tab;
-    document.querySelectorAll('.tab').forEach(function(t, i) {
-        t.classList.toggle('active', ['my-sets','browse','friends'][i] === tab);
+    document.querySelectorAll('.tab').forEach(function(t) {
+        var on = t.getAttribute('data-tab') === tab;
+        t.classList.toggle('active', on);
+        if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
+    if (window.location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
     document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
     var sec = document.getElementById('sec-' + tab);
     if (sec) { sec.classList.add('active'); sec.style.display = 'block'; }
@@ -27,11 +30,11 @@ async function loadMySets() {
         if (d.error) { document.getElementById('mySetsGrid').innerHTML = '<div class="empty-state"><h3>Log in required</h3><p>Create an account to manage flashcard sets</p></div>'; return; }
         if (d.sets.length === 0) { document.getElementById('mySetsGrid').innerHTML = '<div class="empty-state"><h3>No sets yet</h3><p>Create a set to organize your saved vocabulary</p></div>'; return; }
         document.getElementById('mySetsGrid').innerHTML = d.sets.map(function(s) {
-            var badges = '<span class="set-badge badge-count">' + (s.word_count || 0) + ' words</span>';
+            var badges = '<span class="set-badge badge-count">' + wordCount(s.word_count) + '</span>';
             if (s.is_public) badges += '<span class="set-badge badge-public">public</span>';
             else badges += '<span class="set-badge badge-private">private</span>';
             if (s.target_lang) badges += '<span class="set-badge badge-lang">' + (langNames[s.target_lang] || s.target_lang) + '</span>';
-            return '<div class="set-card" onclick="openSet(' + s.id + ')"><div class="set-name">' + escapeHtml(s.name) + '</div>' +
+            return '<div class="set-card" role="button" tabindex="0" onclick="openSet(' + s.id + ')" onkeydown="onCardKey(event, ' + s.id + ')"><div class="set-name">' + escapeHtml(s.name) + '</div>' +
                 (s.description ? '<div class="set-desc">' + escapeHtml(s.description) + '</div>' : '') +
                 '<div class="set-meta">' + badges + '</div></div>';
         }).join('');
@@ -51,11 +54,11 @@ async function loadBrowse() {
             if (meData.user) meId = meData.user.id;
         } catch(e) {}
         document.getElementById('browseGrid').innerHTML = d.sets.map(function(s) {
-            var badges = '<span class="set-badge badge-count">' + (s.word_count || 0) + ' words</span>';
+            var badges = '<span class="set-badge badge-count">' + wordCount(s.word_count) + '</span>';
             if (s.target_lang) badges += '<span class="set-badge badge-lang">' + (langNames[s.target_lang] || s.target_lang) + '</span>';
             var canFork = meId && s.user_id !== meId && (s.word_count || 0) > 0;
             var forkBtn = canFork ? '<button class="btn btn-primary set-card-fork" onclick="event.stopPropagation();quickForkSet(' + s.id + ', this)">+ Save</button>' : '';
-            return '<div class="set-card" onclick="openSet(' + s.id + ')"><div class="set-name">' + escapeHtml(s.name) + '</div>' +
+            return '<div class="set-card" role="button" tabindex="0" onclick="openSet(' + s.id + ')" onkeydown="onCardKey(event, ' + s.id + ')"><div class="set-name">' + escapeHtml(s.name) + '</div>' +
                 (s.description ? '<div class="set-desc">' + escapeHtml(s.description) + '</div>' : '') +
                 '<div class="set-meta">' + badges + '</div>' +
                 '<div class="set-owner">by ' + escapeHtml(s.owner_name || 'Unknown') + forkBtn + '</div></div>';
@@ -67,7 +70,7 @@ async function quickForkSet(setId, btn) {
     if (!btn || btn.disabled) return;
     var originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = '...';
+    btn.textContent = 'Saving…';
     try {
         var r = await fetch('/api/sets/' + setId + '/fork', { method: 'POST' });
         var d = await r.json();
@@ -88,14 +91,14 @@ async function openSet(setId) {
     try {
         var r = await fetch('/api/sets/' + setId);
         var d = await r.json();
-        if (d.error) { alert(d.error); return; }
+        if (d.error) { showToast(d.error); return; }
         currentSetId = setId;
         currentSetData = d.set;
 
         document.getElementById('detailTitle').textContent = d.set.name;
         document.getElementById('detailDesc').textContent = d.set.description || '';
 
-        var meta = '<span class="set-badge badge-count">' + d.words.length + ' words</span>';
+        var meta = '<span class="set-badge badge-count">' + wordCount(d.words.length) + '</span>';
         if (d.set.is_public) meta += '<span class="set-badge badge-public">public</span>';
         else meta += '<span class="set-badge badge-private">private</span>';
         if (d.set.target_lang) meta += '<span class="set-badge badge-lang">' + (langNames[d.set.target_lang] || d.set.target_lang) + '</span>';
@@ -125,7 +128,7 @@ async function openSet(setId) {
                 var tags = '<span class="word-tag tag-pos">' + escapeHtml(w.pos) + '</span>';
                 if (w.grammatical_case) tags += '<span class="word-tag tag-case">' + escapeHtml(w.grammatical_case) + '</span>';
                 if (w.difficulty) tags += '<span class="word-tag tag-cefr cefr-' + escapeHtml(w.difficulty) + '">' + escapeHtml(w.difficulty) + '</span>';
-                var removeBtn = isOwner ? '<button class="word-remove" onclick="event.stopPropagation();removeFromSet(' + currentSetId + ',' + w.id + ')">&times;</button>' : '';
+                var removeBtn = isOwner ? '<button class="word-remove" type="button" aria-label="Remove from set" onclick="event.stopPropagation();removeFromSet(' + currentSetId + ',' + w.id + ')">&times;</button>' : '';
                 return '<div class="word-row"><div class="word-main"><div class="word-text">' + escapeHtml(w.word) + '</div><div class="word-meaning">' + escapeHtml(w.meaning) + '</div><div class="word-tags">' + tags + '</div></div>' + removeBtn + '</div>';
             }).join('');
         }
@@ -224,7 +227,7 @@ async function forkCurrentSet() {
     if (!btn || btn.disabled) return;
     var originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Saving...';
+    btn.textContent = 'Saving…';
     try {
         var r = await fetch('/api/sets/' + currentSetId + '/fork', { method: 'POST' });
         var d = await r.json();
@@ -262,7 +265,7 @@ function openAddWords() {
     document.getElementById('addWordsConfirm').disabled = true;
     document.getElementById('addWordsConfirm').textContent = 'Add to set';
     document.getElementById('addWordsHint').textContent = 'Pick saved ' + (langNames[currentSetData.target_lang] || currentSetData.target_lang || '') + ' words for "' + currentSetData.name + '".';
-    document.getElementById('addWordsList').innerHTML = '<div class="add-words-empty">Loading vocabulary...</div>';
+    document.getElementById('addWordsList').innerHTML = '<div class="add-words-empty">Loading vocabulary…</div>';
     document.getElementById('addWordsModal').classList.add('open');
 
     Promise.all([
@@ -339,7 +342,7 @@ async function confirmAddWords() {
     var ids = Array.from(addWordsState.selected);
     if (!ids.length) return;
     btn.disabled = true;
-    btn.textContent = 'Adding...';
+    btn.textContent = 'Adding…';
     try {
         await Promise.all(ids.map(function(vid) {
             return fetch('/api/sets/' + currentSetId + '/add', {
@@ -357,7 +360,7 @@ async function confirmAddWords() {
     } catch(e) {
         btn.disabled = false;
         btn.textContent = 'Add to set';
-        alert('Could not add some words. Please try again.');
+        showToast('Could not add some words. Please try again.');
     }
 }
 
@@ -385,7 +388,7 @@ async function sendRequest() {
     if (btn.disabled) return;
     btn.disabled = true;
     var originalText = btn.textContent;
-    btn.textContent = 'Sending...';
+    btn.textContent = 'Sending…';
     try {
         var r = await fetch('/api/friends/request', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -475,10 +478,10 @@ async function removeFriend(id, name) {
     try {
         var r = await fetch('/api/friends/remove/' + id, { method: 'POST' });
         var d = await r.json();
-        if (d.error) { alert(d.error); return; }
+        if (d.error) { showToast(d.error); return; }
         loadFriends();
     } catch(e) {
-        alert('Could not remove friend. Please try again.');
+        showToast('Could not remove friend. Please try again.');
     }
 }
 
@@ -486,7 +489,7 @@ async function viewFriendSets(friendId, friendName) {
     try {
         var r = await fetch('/api/friends/' + friendId + '/sets');
         var d = await r.json();
-        if (d.error) { alert(d.error); return; }
+        if (d.error) { showToast(d.error); return; }
 
         document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
         document.querySelector('.tabs').style.display = 'none';
@@ -494,7 +497,7 @@ async function viewFriendSets(friendId, friendName) {
         var sec = document.getElementById('sec-detail');
         document.getElementById('detailTitle').textContent = friendName + "'s public sets";
         document.getElementById('detailDesc').textContent = '';
-        document.getElementById('detailMeta').innerHTML = '<span class="set-badge badge-count">' + d.sets.length + ' public sets</span>';
+        document.getElementById('detailMeta').innerHTML = '<span class="set-badge badge-count">' + d.sets.length + (d.sets.length === 1 ? ' public set' : ' public sets') + '</span>';
         document.getElementById('studyBtn').style.display = 'none';
         document.getElementById('saveToLibraryBtn').style.display = 'none';
         document.getElementById('addWordsBtn').style.display = 'none';
@@ -505,15 +508,41 @@ async function viewFriendSets(friendId, friendName) {
             document.getElementById('detailWords').innerHTML = '<div class="empty-state"><p>' + escapeHtml(friendName) + ' has no public sets yet</p></div>';
         } else {
             document.getElementById('detailWords').innerHTML = '<div class="set-grid">' + d.sets.map(function(s) {
-                var badges = '<span class="set-badge badge-count">' + (s.word_count || 0) + ' words</span>';
+                var badges = '<span class="set-badge badge-count">' + wordCount(s.word_count) + '</span>';
                 if (s.target_lang) badges += '<span class="set-badge badge-lang">' + (langNames[s.target_lang] || s.target_lang) + '</span>';
-                return '<div class="set-card" onclick="openSet(' + s.id + ')"><div class="set-name">' + escapeHtml(s.name) + '</div>' +
+                return '<div class="set-card" role="button" tabindex="0" onclick="openSet(' + s.id + ')" onkeydown="onCardKey(event, ' + s.id + ')"><div class="set-name">' + escapeHtml(s.name) + '</div>' +
                     (s.description ? '<div class="set-desc">' + escapeHtml(s.description) + '</div>' : '') +
                     '<div class="set-meta">' + badges + '</div></div>';
             }).join('') + '</div>';
         }
         sec.style.display = 'block';
     } catch(e) { console.error(e); }
+}
+
+function wordCount(n) {
+    n = n || 0;
+    return n + (n === 1 ? ' word' : ' words');
+}
+
+// Open a set card with Enter or Space, like a button.
+function onCardKey(e, setId) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSet(setId); }
+}
+
+// Short message at the bottom of the screen, instead of a browser alert.
+function showToast(message) {
+    var el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(function() { el.classList.remove('show'); }, 4000);
+}
+
+// Match the theme chosen on the translator page.
+if (document.body.getAttribute('data-theme') === 'light') {
+    var siteLogo = document.getElementById('siteLogo');
+    if (siteLogo) siteLogo.src = '/static/logo-light.png';
 }
 
 // Init

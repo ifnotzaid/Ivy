@@ -3,34 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ivy - community</title>
+<meta name="theme-color" content="#040806">
+<meta name="color-scheme" content="dark light">
+<title>Community — Ivy</title>
 <link rel="icon" type="image/png" href="/static/favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/sets.css">
 </head>
 <body>
+<script>try{if(localStorage.getItem('ivy-theme')==='light')document.body.setAttribute('data-theme','light');}catch(e){}</script>
 <div class="container">
 
 <!-- Nav -->
-<div class="nav">
+<header class="nav">
 <div class="nav-left">
 <a class="back-link" href="/">&#8592; Translator</a>
-<div class="nav-logo"><img src="/static/logo-dark.png" alt="ivy"></div>
+<a class="nav-logo" href="/"><img id="siteLogo" src="/static/logo-dark.png" alt="Ivy" width="326" height="158"></a>
 </div>
-</div>
+</header>
+<h1 class="page-title">Community</h1>
 
 <!-- Tabs -->
-<div class="tabs">
-<button class="tab active" onclick="showTab('my-sets')">My sets</button>
-<button class="tab" onclick="showTab('browse')">Browse</button>
-<button class="tab" onclick="showTab('friends')">Friends</button>
-</div>
+<nav class="tabs" aria-label="Community sections">
+<button class="tab active" type="button" data-tab="my-sets" aria-current="page" onclick="showTab('my-sets')">My sets</button>
+<button class="tab" type="button" data-tab="browse" onclick="showTab('browse')">Browse</button>
+<button class="tab" type="button" data-tab="friends" onclick="showTab('friends')">Friends</button>
+</nav>
 
 <!-- My Sets -->
 <div class="section active" id="sec-my-sets">
 <div class="section-header">
-<div class="section-title">My sets</div>
-<button class="btn btn-primary" onclick="openCreateSet()">+ New set</button>
+<h2 class="section-title">My sets</h2>
+<button type="button" class="btn btn-primary" onclick="openCreateSet()">+ New set</button>
 </div>
 <div id="mySetsGrid" class="set-grid">
 <div class="empty-state"><h3>No sets yet</h3><p>Create a set to organize your saved vocabulary into themed collections</p></div>
@@ -40,7 +46,7 @@
 <!-- Browse public sets -->
 <div class="section" id="sec-browse">
 <div class="section-header">
-<div class="section-title">Public sets</div>
+<h2 class="section-title">Public sets</h2>
 </div>
 <div id="browseGrid" class="set-grid">
 <div class="empty-state"><h3>No public sets</h3><p>Public sets from other users will appear here</p></div>
@@ -50,8 +56,8 @@
 <!-- Friends -->
 <div class="section" id="sec-friends">
 <div class="section-header">
-<div class="section-title">Friends</div>
-<button class="btn" onclick="openAddFriend()">+ Add friend</button>
+<h2 class="section-title">Friends</h2>
+<button type="button" class="btn" onclick="openAddFriend()">+ Add friend</button>
 </div>
 <div id="pendingRequests"></div>
 <div id="friendsList" class="friend-list">
@@ -62,16 +68,16 @@
 <!-- Set detail view (hidden by default) -->
 <div class="section" id="sec-detail" style="display:none">
 <div class="detail-header">
-<div class="detail-back" onclick="closeDetail()">&#8592; Back to sets</div>
-<div class="detail-title" id="detailTitle"></div>
+<button type="button" class="detail-back" onclick="closeDetail()">&#8592; Back to sets</button>
+<h2 class="detail-title" id="detailTitle"></h2>
 <div class="detail-desc" id="detailDesc"></div>
 <div class="detail-meta" id="detailMeta"></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-<button class="btn btn-primary" id="studyBtn" onclick="goPracticeThisSet()">Study this set</button>
-<button class="btn btn-primary" id="saveToLibraryBtn" onclick="forkCurrentSet()" style="display:none">+ Save to my library</button>
-<button class="btn" id="addWordsBtn" onclick="openAddWords()">Add words</button>
-<button class="btn" id="togglePublicBtn" onclick="toggleSetPublic()">Make public</button>
-<button class="btn btn-danger" id="deleteSetBtn" onclick="deleteCurrentSet()">Delete</button>
+<button type="button" class="btn btn-primary" id="studyBtn" onclick="goPracticeThisSet()">Study this set</button>
+<button type="button" class="btn btn-primary" id="saveToLibraryBtn" onclick="forkCurrentSet()" style="display:none">+ Save to my library</button>
+<button type="button" class="btn" id="addWordsBtn" onclick="openAddWords()">Add words</button>
+<button type="button" class="btn" id="togglePublicBtn" onclick="toggleSetPublic()">Make public</button>
+<button type="button" class="btn btn-danger" id="deleteSetBtn" onclick="deleteCurrentSet()">Delete</button>
 </div>
 </div>
 <div class="word-list" id="detailWords"></div>
@@ -81,54 +87,55 @@
 
 <!-- Create set modal -->
 <div class="modal-overlay" id="createSetModal">
-<div class="modal">
-<button class="modal-close" onclick="closeCreateSet()">&times;</button>
-<h2>New flashcard set</h2>
-<div class="field"><label>Name</label><input type="text" id="setName" placeholder="e.g., German cases, Turkish food vocab"></div>
-<div class="field"><label>Description (optional)</label><textarea id="setDesc" placeholder="What's this set about?"></textarea></div>
-<div class="field"><label>Language</label>
+<div class="modal" role="dialog" aria-modal="true" aria-labelledby="createSetTitle">
+<button class="modal-close" type="button" aria-label="Close" onclick="closeCreateSet()">&times;</button>
+<h2 id="createSetTitle">New flashcard set</h2>
+<div class="field"><label for="setName">Name</label><input type="text" id="setName" autocomplete="off" placeholder="e.g. German cases, Turkish food…"></div>
+<div class="field"><label for="setDesc">Description (optional)</label><textarea id="setDesc" placeholder="What’s this set about?"></textarea></div>
+<div class="field"><label for="setLang">Language</label>
 <select id="setLang"><option value="">Any</option><option value="tr">Turkish</option><option value="ru">Russian</option><option value="de">German</option><option value="en">English</option></select>
 </div>
 <div class="field">
 <label class="checkbox-row"><input type="checkbox" id="setPublic"> Make this set public (friends can see it)</label>
 </div>
-<div class="modal-error" id="createSetError"></div>
-<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="createSet()">Create set</button>
+<div class="modal-error" role="alert" id="createSetError"></div>
+<button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="createSet()">Create set</button>
 </div>
 </div>
 
 <!-- Add friend modal -->
 <div class="modal-overlay" id="addFriendModal">
-<div class="modal">
-<button class="modal-close" onclick="closeAddFriend()">&times;</button>
-<h2>Add a friend</h2>
+<div class="modal" role="dialog" aria-modal="true" aria-labelledby="addFriendTitle">
+<button class="modal-close" type="button" aria-label="Close" onclick="closeAddFriend()">&times;</button>
+<h2 id="addFriendTitle">Add a friend</h2>
 <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Enter their email address to send a friend request</p>
-<div class="field"><label>Email</label><input type="email" id="friendEmail" placeholder="friend@email.com" onkeydown="submitFriendOnEnter(event)"></div>
-<div class="modal-error" id="addFriendError"></div>
-<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="sendRequest()">Send request</button>
+<div class="field"><label for="friendEmail">Email</label><input type="email" id="friendEmail" autocomplete="off" spellcheck="false" placeholder="friend@email.com" onkeydown="submitFriendOnEnter(event)"></div>
+<div class="modal-error" role="alert" id="addFriendError"></div>
+<button type="button" class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="sendRequest()">Send request</button>
 </div>
 </div>
 
 <!-- Add words modal -->
 <div class="modal-overlay" id="addWordsModal">
-<div class="modal" style="max-width:560px;">
-<button class="modal-close" onclick="closeAddWords()">&times;</button>
-<h2>Add words to this set</h2>
+<div class="modal" style="max-width:560px;" role="dialog" aria-modal="true" aria-labelledby="addWordsTitle">
+<button class="modal-close" type="button" aria-label="Close" onclick="closeAddWords()">&times;</button>
+<h2 id="addWordsTitle">Add words to this set</h2>
 <p class="add-words-hint" id="addWordsHint">Pick words from your saved vocabulary</p>
 <div class="add-words-search">
-<input type="text" id="addWordsSearch" placeholder="Filter by word or meaning..." oninput="filterAddWords()">
+<input type="text" id="addWordsSearch" aria-label="Filter words" autocomplete="off" placeholder="Filter by word or meaning…" oninput="filterAddWords()">
 </div>
 <div class="add-words-list" id="addWordsList"></div>
 <div class="add-words-foot">
 <div class="add-words-counter" id="addWordsCounter">0 selected</div>
 <div style="display:flex;gap:8px;">
-<button class="btn" onclick="closeAddWords()">Cancel</button>
-<button class="btn btn-primary" id="addWordsConfirm" onclick="confirmAddWords()" disabled>Add to set</button>
+<button type="button" class="btn" onclick="closeAddWords()">Cancel</button>
+<button type="button" class="btn btn-primary" id="addWordsConfirm" onclick="confirmAddWords()" disabled>Add to set</button>
 </div>
 </div>
 </div>
 </div>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="/static/js/sets.js"></script>
 </body>
 </html>

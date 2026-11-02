@@ -25,8 +25,8 @@ const $=id=>document.getElementById(id);
 const logoSources={dark:'/static/logo-dark.png',light:'/static/logo-light.png'};
 const markLogoSources={dark:'/static/logo-mark-dark-128.png',light:'/static/logo-mark-128.png'};
 const speakerIconSources={dark:'/static/speaker-icon-dark-128.png',light:'/static/speaker-icon-light-128.png'};
-const defaultOutputHint='Hover translated words to inspect meanings, grammar, and save useful vocabulary.';
-const loadingOutputHint='Translating with word-level analysis...';
+const defaultOutputHint='Tap or hover a translated word to see its meaning and grammar, and save it to your vocabulary.';
+const loadingOutputHint='Translating with word-level analysis…';
 const errorOutputHint='Check your connection or try again in a moment.';
 const storyFunFacts=[
     'Fun fact: Reading just above your level is called comprehensible input.',
@@ -84,9 +84,9 @@ function setOutputEmpty(title,hint){
 }
 
 function setCompareLoading(){
-    $('cmpFormal').textContent='Preparing formal version...';
-    $('cmpNeutral').textContent='Preparing neutral version...';
-    $('cmpCasual').textContent='Preparing casual version...';
+    $('cmpFormal').textContent='Preparing formal version…';
+    $('cmpNeutral').textContent='Preparing neutral version…';
+    $('cmpCasual').textContent='Preparing casual version…';
 }
 
 function escapeHtml(value){
@@ -355,7 +355,7 @@ async function getFlashcardLanguages(preferredLang){
 function checkRestyleMode(){
     const same=$('srcLang').value===$('tgtLang').value;
     $('restyleBadge').classList.toggle('visible',same);
-    $('inputArea').placeholder=same?'Type text to restyle...':'Start typing to translate...';
+    $('inputArea').placeholder=same?'Type text to restyle…':'Start typing to translate…';
 }
 function rescheduleForCurrentMode(){
     if($('inputArea').value.trim().length<=2)return;
@@ -370,6 +370,8 @@ async function checkAuth(){try{const r=await fetch('/api/auth/me');const d=await
 function updateAuthUI(){
     const btn=$('avatarBtn');
     if(currentUser){btn.textContent=currentUser.display_name.substring(0,2).toUpperCase();btn.classList.add('logged-in');$('dropdownHeader').innerHTML=`<div class="dropdown-name">${escapeHtml(currentUser.display_name)}</div><div class="dropdown-email">${escapeHtml(currentUser.email)}</div>`;$('menuLogin').style.display='none';$('menuLogout').style.display='flex';}
+    var shelfNote=$('savedStoriesSubtle');
+    if(shelfNote)shelfNote.textContent=currentUser?'Your reading shelf':'Log in to keep a personal reading shelf';
     else{btn.textContent='Guest';btn.classList.remove('logged-in');$('dropdownHeader').innerHTML='<div class="dropdown-name">Guest</div><div class="dropdown-email">Not logged in</div>';$('menuLogin').style.display='flex';$('menuLogout').style.display='none';}
 }
 function openAuth(){$('authModal').classList.add('open');showLogin();}
@@ -385,8 +387,8 @@ function submitAuthOnEnter(event,mode){
     else doLogin();
 }
 async function doLogout(){await fetch('/api/auth/logout',{method:'POST'});currentUser=null;currentFlashcardSetId=null;availableFlashcardSets=[];updateAuthUI();loadSavedStories();refreshVocabCounts();if(currentMode==='practice')initPracticeMode();if(currentMode==='flashcards')loadFlashcards(currentFlashcardLang);closeDropdown();}
-function toggleUserMenu(){$('userDropdown').classList.toggle('open');}
-function closeDropdown(){$('userDropdown').classList.remove('open');}
+function toggleUserMenu(){var open=$('userDropdown').classList.toggle('open');$('avatarBtn').setAttribute('aria-expanded',open?'true':'false');}
+function closeDropdown(){$('userDropdown').classList.remove('open');$('avatarBtn').setAttribute('aria-expanded','false');}
 document.addEventListener('click',e=>{if(!e.target.closest('.avatar-btn')&&!e.target.closest('.user-dropdown'))closeDropdown();});
 
 // Vocab
@@ -486,7 +488,7 @@ async function populatePracticeStorySources(){
             var opt=document.createElement('option');
             opt.value=story.id;
             var title=story.title||'Untitled story';
-            if(title.length>58)title=title.slice(0,55)+'...';
+            if(title.length>58)title=title.slice(0,55)+'…';
             opt.textContent=title;
             sourceSelect.appendChild(opt);
         });
@@ -504,7 +506,7 @@ async function startPracticeQuiz(){
     if(startBtn)startBtn.disabled=true;
     if(statusEl){
         statusEl.classList.remove('error');
-        statusEl.textContent='Building practice and translating sentences...';
+        statusEl.textContent='Building practice and translating sentences…';
     }
     var payload={
         target_lang:$('practiceLang').value,
@@ -705,9 +707,9 @@ function setFlashcardLang(el,lang){
 
 async function loadFlashcards(lang){
     currentFlashcardLang=lang||currentFlashcardLang||$('tgtLang').value||'tr';
-    if(!currentUser){renderFlashcardFilters([]);renderFlashcardSetFilter();$('fcProgress').textContent='';$('fcContent').innerHTML='<div class="flashcard-done"><h3>Log in required</h3><p>Create an account to use flashcards</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
+    if(!currentUser){renderFlashcardFilters([]);renderFlashcardSetFilter();$('fcProgress').textContent='';$('fcContent').innerHTML='<div class="flashcard-done"><h2>Log in required</h2><p>Create an account to use flashcards</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
     var availableLangs=await getFlashcardLanguages(currentFlashcardLang);
-    if(availableLangs.length===0){renderFlashcardFilters([]);renderFlashcardSetFilter();$('fcProgress').textContent='';$('fcContent').innerHTML='<div class="flashcard-done"><h3>No flashcards yet</h3><p>Save a few translated words to vocabulary first, then come back here to study them.</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
+    if(availableLangs.length===0){renderFlashcardFilters([]);renderFlashcardSetFilter();$('fcProgress').textContent='';$('fcContent').innerHTML='<div class="flashcard-done"><h2>No flashcards yet</h2><p>Save a few translated words to vocabulary first, then come back here to study them.</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
     if(availableLangs.indexOf(currentFlashcardLang)===-1)currentFlashcardLang=availableLangs[0];
     renderFlashcardFilters(availableLangs);
     await refreshFlashcardSets();
@@ -720,7 +722,7 @@ async function loadFlashcards(lang){
         var emptyMsg=currentFlashcardSetId
             ? 'No cards due in this set. The SRS will resurface words when their next review comes up.'
             : 'No cards due for '+(langNames[currentFlashcardLang]||currentFlashcardLang)+'. Save more words or review another saved language.';
-        $('fcContent').innerHTML='<div class="flashcard-done"><h3>All done!</h3><p>'+emptyMsg+'</p></div>';
+        $('fcContent').innerHTML='<div class="flashcard-done"><h2>All done!</h2><p>'+emptyMsg+'</p></div>';
         $('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);
     }
     else showFlashcard();}catch(e){console.error(e);}
@@ -775,7 +777,7 @@ function clearFlashcardSetFilter(){
 }
 
 function showFlashcard(){
-    if(fcIndex>=flashcards.length){$('fcContent').innerHTML='<div class="flashcard-done"><h3>Session complete!</h3><p>Reviewed '+flashcards.length+' cards</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
+    if(fcIndex>=flashcards.length){$('fcContent').innerHTML='<div class="flashcard-done"><h2>Session complete!</h2><p>Reviewed '+flashcards.length+' cards</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
     var c=flashcards[fcIndex];var tags='';if(c.pos)tags+='<span class="vocab-tag tag-pos">'+escapeHtml(c.pos)+'</span>';if(c.grammatical_case)tags+='<span class="vocab-tag tag-case">'+escapeHtml(c.grammatical_case)+'</span>';if(c.difficulty)tags+='<span class="vocab-tag tooltip-cefr cefr-'+escapeHtml(c.difficulty)+'">'+escapeHtml(c.difficulty)+'</span>';
     $('fcProgress').textContent=flashcardDeckLabel()+' - card '+(fcIndex+1)+' of '+flashcards.length;
     $('fcContent').innerHTML='<div class="flashcard" onclick="this.classList.toggle(\'flipped\')"><div class="flashcard-lang">'+(langNames[c.target_lang]||c.target_lang)+'</div><div class="flashcard-word">'+escapeHtml(c.word)+'</div>'+(c.base_form&&c.base_form!==c.word?'<div class="flashcard-base">'+escapeHtml(c.base_form)+'</div>':'')+'<div class="flashcard-tags">'+tags+'</div><div class="flashcard-reveal">tap to reveal</div><div class="flashcard-answer"><div class="flashcard-meaning">'+escapeHtml(c.meaning||'—')+'</div>'+(c.sentence?'<div class="flashcard-sentence">'+escapeHtml(c.sentence)+'</div>':'')+'</div></div>';
@@ -831,12 +833,12 @@ function updateSaveStoryButton(state){
     if(!btn)return;
     if(state==='saving'){
         btn.disabled=true;
-        btn.textContent='Saving...';
+        btn.textContent='Saving…';
         return;
     }
     if(state==='analyzing'){
         btn.disabled=true;
-        btn.textContent='Analyzing words...';
+        btn.textContent='Analyzing words…';
         return;
     }
     if(currentStory&&currentStory.saved){
@@ -846,7 +848,7 @@ function updateSaveStoryButton(state){
     }
     if(currentStory&&currentStory._wordAnalysisPromise){
         btn.disabled=true;
-        btn.textContent='Analyzing words...';
+        btn.textContent='Analyzing words…';
         return;
     }
     if(!currentUser){
@@ -944,7 +946,7 @@ async function saveCurrentStory(){
     }
     try{
         if(!(storyToSave.word_data||[]).length){
-            $('storyStatus').textContent='Finishing word analysis before saving...';
+            $('storyStatus').textContent='Finishing word analysis before saving…';
             updateSaveStoryButton('analyzing');
             await ensureStoryWordAnalysisReady(storyToSave);
         }
@@ -952,7 +954,7 @@ async function saveCurrentStory(){
         if(!(storyToSave.word_data||[]).length){
             throw new Error('Ivy could not finish word analysis yet. Try saving again in a moment.');
         }
-        $('storyStatus').textContent='Saving story...';
+        $('storyStatus').textContent='Saving story…';
         updateSaveStoryButton('saving');
         var payload={
             title:storyToSave.title,
@@ -995,7 +997,7 @@ async function loadSavedStories(){
         if(d.error){$('savedStoriesList').innerHTML='<div class="story-empty">'+escapeHtml(d.error)+'</div>';return;}
         if(!d.stories||d.stories.length===0){$('savedStoriesList').innerHTML='<div class="story-empty">No saved stories yet. Generate one you want to revisit.</div>';return;}
         $('savedStoriesList').innerHTML=d.stories.map(function(story){
-            return '<div class="saved-story-card" onclick="openSavedStory('+story.id+')"><div class="saved-story-top"><div><div class="saved-story-title">'+escapeHtml(story.title)+'</div><div class="saved-story-meta">'+escapeHtml((langNames[story.target_lang]||story.target_lang)+' • '+story.cefr_level+' • '+(story.theme||'story'))+'</div></div><button class="saved-story-delete" onclick="deleteSavedStory(event,'+story.id+')">&times;</button></div></div>';
+            return '<div class="saved-story-card" role="button" tabindex="0" onclick="openSavedStory('+story.id+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openSavedStory('+story.id+');}"><div class="saved-story-top"><div><div class="saved-story-title">'+escapeHtml(story.title)+'</div><div class="saved-story-meta">'+escapeHtml((langNames[story.target_lang]||story.target_lang)+' • '+story.cefr_level+' • '+(story.theme||'story'))+'</div></div><button class="saved-story-delete" onclick="deleteSavedStory(event,'+story.id+')">&times;</button></div></div>';
         }).join('');
     }catch(e){
         $('savedStoriesList').innerHTML='<div class="story-empty">Could not load saved stories.</div>';
@@ -1004,7 +1006,7 @@ async function loadSavedStories(){
 
 async function openSavedStory(storyId){
     try{
-        $('storyStatus').textContent='Opening saved story...';
+        $('storyStatus').textContent='Opening saved story…';
         var r=await fetch('/api/stories/'+storyId);
         var d=await r.json();
         if(d.error)throw new Error(d.error);
@@ -1018,7 +1020,7 @@ async function openSavedStory(storyId){
         setMode('stories');
         openStoryReader();
         if(story.story_text&&story.word_data.length===0){
-            $('storyStatus').textContent='Story loaded. Adding hoverable word analysis in the background...';
+            $('storyStatus').textContent='Story loaded. Adding hoverable word analysis in the background…';
             startStoryWordAnalysis(story,'Story ready. Hover words to inspect and save vocabulary.');
         }
     }catch(e){
@@ -1199,7 +1201,7 @@ function clearTranslatorOutputState(){
     compareRequestId++;
     abortTranslateRequest();
     abortCompareRequest();
-    setOutputEmpty('Translation appears here...',defaultOutputHint);
+    setOutputEmpty('Translation appears here…',defaultOutputHint);
     $('outCharCount').innerHTML='&nbsp;';
     $('analysisRow').style.display='none';
     $('posLegend').style.display='none';
@@ -1257,7 +1259,16 @@ function isCurrentCompareRequest(requestId,snapshot){
 function setMode(mode){
     var previousMode=currentMode;
     currentMode=mode;
-    document.querySelectorAll('.mode-tab').forEach(function(t){t.classList.toggle('active',t.dataset.mode===mode);});
+    document.querySelectorAll('.mode-tab').forEach(function(t){
+        var on=t.dataset.mode===mode;
+        t.classList.toggle('active',on);
+        if(on){
+            t.setAttribute('aria-current','page');
+            if(t.scrollIntoView)t.scrollIntoView({block:'nearest',inline:'nearest'});
+        }else t.removeAttribute('aria-current');
+    });
+    var hash=mode==='translate'?'':'#'+mode;
+    if(window.location.hash!==hash)history.replaceState(null,'',window.location.pathname+window.location.search+hash);
     $('langBar').style.display=(mode==='flashcards'||mode==='stories'||mode==='practice')?'none':'flex';
     // Compare mode: expand input panel, hide output panel
     var grid=$('translatorGrid');
@@ -1296,7 +1307,7 @@ function setMode(mode){
     }
     if(mode==='practice')initPracticeMode();
 }
-function setStyle(el){document.querySelectorAll('.style-chip').forEach(function(c){c.classList.remove('active');});el.classList.add('active');currentStyle=el.dataset.style;if(currentMode==='translate'&&$('inputArea').value.trim().length>2)scheduleTranslation();}
+function setStyle(el){document.querySelectorAll('.style-chip').forEach(function(c){c.classList.remove('active');c.setAttribute('aria-pressed','false');});el.classList.add('active');el.setAttribute('aria-pressed','true');currentStyle=el.dataset.style;if(currentMode==='translate'&&$('inputArea').value.trim().length>2)scheduleTranslation();}
 function swapLangs(){var s=$('srcLang'),t=$('tgtLang');var tmp=s.value;s.value=t.value;t.value=tmp;checkRestyleMode();rescheduleForCurrentMode();}
 function clearInput(){ $('inputArea').value='';$('charCount').textContent='0';$('detectedBadge').classList.remove('visible');clearTranslatorOutputState();}
 function speakTranslation(){if(!lastTranslation||lastTranslationSource!=='translate')return;var u=new SpeechSynthesisUtterance(lastTranslation);u.lang={tr:'tr-TR',ru:'ru-RU',de:'de-DE',en:'en-US'}[$('tgtLang').value]||'en-US';u.rate=0.9;speechSynthesis.cancel();speechSynthesis.speak(u);}
@@ -1402,7 +1413,7 @@ async function askIvyWhy(){
 
     btn.classList.add('is-thinking');
     var logoSrc=$('ivyPanelLogo')?$('ivyPanelLogo').src:'/static/logo-mark-dark-128.png';
-    content.innerHTML='<div class="ivy-panel-loading"><img src="'+escapeHtml(logoSrc)+'" alt=""><div>Ivy is breaking it down...</div></div>';
+    content.innerHTML='<div class="ivy-panel-loading"><img src="'+escapeHtml(logoSrc)+'" alt=""><div>Ivy is breaking it down…</div></div>';
     var myToken=++ivyExplainToken;
 
     try{
@@ -1469,7 +1480,7 @@ var inputArea=$('inputArea');
         if (vulgar) tags += '<span class="tooltip-tag" style="background:rgba(239,68,68,0.1);color:#ef4444;">vulgar</span>';
         var vulgarClass = vulgar ? ' word-vulgar' : '';
         var speakButton = allowStoryAudio ? '<button type="button" class="tooltip-speak" onmouseenter="prefetchStoryWordAudio(' + index + ')" onclick="playStoryWordAudio(event,' + index + ')" aria-label="Listen to word" title="Listen to word"><span class="tooltip-speak-icon">&#128266;</span></button>' : '';
-        return '<span class="word-span' + vulgarClass + '" data-pos="' + safePos + '" data-index="' + index + '" data-vulgar="' + vulgar + '">' + escapeHtml(shownWord) + '<span class="tooltip"><div class="tooltip-header"><div><div class="tooltip-word-row"><div class="tooltip-word">' + escapeHtml(w.word) + (vulgar ? ' <span style="color:#ef4444;font-size:11px;">&#9888;</span>' : '') + '</div>' + speakButton + '</div>' + (baseForm !== w.word ? '<div class="tooltip-base">' + escapeHtml(baseForm) + '</div>' : '') + '</div>' + (diff ? '<span class="tooltip-cefr cefr-' + escapeHtml(diff) + '">' + escapeHtml(diff) + '</span>' : '') + '</div>' + (meaning ? '<div class="tooltip-meaning">' + escapeHtml(meaning) + '</div>' : '') + '<div class="tooltip-tags">' + tags + '</div><button class="tooltip-save" onclick="saveWord(event,' + index + ')">+ Save to vocabulary</button></span></span>';
+        return '<span class="word-span' + vulgarClass + '" tabindex="0" data-pos="' + safePos + '" data-index="' + index + '" data-vulgar="' + vulgar + '">' + escapeHtml(shownWord) + '<span class="tooltip"><div class="tooltip-header"><div><div class="tooltip-word-row"><div class="tooltip-word">' + escapeHtml(w.word) + (vulgar ? ' <span style="color:#ef4444;font-size:11px;">&#9888;</span>' : '') + '</div>' + speakButton + '</div>' + (baseForm !== w.word ? '<div class="tooltip-base">' + escapeHtml(baseForm) + '</div>' : '') + '</div>' + (diff ? '<span class="tooltip-cefr cefr-' + escapeHtml(diff) + '">' + escapeHtml(diff) + '</span>' : '') + '</div>' + (meaning ? '<div class="tooltip-meaning">' + escapeHtml(meaning) + '</div>' : '') + '<div class="tooltip-tags">' + tags + '</div><button class="tooltip-save" onclick="saveWord(event,' + index + ')">+ Save to vocabulary</button></span></span>';
     }
 
     function renderStoryGapSegment(segment, previousWordIndex, allowStoryAudio){
@@ -1733,7 +1744,7 @@ async function generateStory(){
         if((d.word_data||[]).length>0){
             $('storyStatus').textContent='Story ready. Hover words to inspect and save vocabulary.';
         }else{
-            $('storyStatus').textContent='Story ready. Adding hoverable word analysis in the background...';
+            $('storyStatus').textContent='Story ready. Adding hoverable word analysis in the background…';
             startStoryWordAnalysis(d,'Story ready. Hover words to inspect and save vocabulary.');
         }
     }catch(e){
@@ -1750,7 +1761,7 @@ async function generateStory(){
 
 async function openSavedStory(storyId){
     try{
-        $('storyStatus').textContent='Opening saved story...';
+        $('storyStatus').textContent='Opening saved story…';
         var r=await fetch('/api/stories/'+storyId);
         var d=await r.json();
         if(d.error)throw new Error(d.error);
@@ -1764,7 +1775,7 @@ async function openSavedStory(storyId){
         setMode('stories');
         openStoryReader();
         if(story.story_text&&story.word_data.length===0){
-            $('storyStatus').textContent='Story loaded. Adding hoverable word analysis in the background...';
+            $('storyStatus').textContent='Story loaded. Adding hoverable word analysis in the background…';
             startStoryWordAnalysis(story,'Story ready. Hover words to inspect and save vocabulary.');
         }
     }catch(e){
@@ -1793,7 +1804,7 @@ function scheduleTranslation(){
     $('copyTranslationBtn').classList.remove('visible','copied');
     $('copyTranslationBtn').textContent='Copy';
     closeIvyPanel();
-    setOutputEmpty('Translation appears here...',loadingOutputHint);
+    setOutputEmpty('Translation appears here…',loadingOutputHint);
     translateTimer=setTimeout(function(){doTranslate(requestId);},800);
 }
 function scheduleCompare(){
@@ -1878,6 +1889,9 @@ function renderRadar(results){var ctx=$('radarChart');if(radarChart)radarChart.d
 
 var activeTooltipWord=null;
 var tooltipHideTimer=null;
+var tooltipOpenedAt=0;
+var lastPointerType='mouse';
+document.addEventListener('pointerdown',function(e){lastPointerType=e.pointerType||'mouse';},true);
 
 function clearTooltipHide(){
     if(tooltipHideTimer){
@@ -1915,6 +1929,7 @@ function positionTooltip(wordSpan){
     if(activeTooltipWord&&activeTooltipWord!==wordSpan){
         hideActiveTooltip();
     }
+    if(activeTooltipWord!==wordSpan)tooltipOpenedAt=Date.now();
     activeTooltipWord=wordSpan;
     activeTooltipWord.classList.add('tooltip-open');
     tooltip.classList.add('tooltip-visible');
@@ -1924,7 +1939,45 @@ function positionTooltip(wordSpan){
     tooltip.style.left='50%';
     tooltip.style.right='auto';
     tooltip.style.transform='translateX(-50%)';
+    keepTooltipOnScreen(tooltip);
 }
+
+// Nudge an open tooltip so it never runs off the side or top of the screen.
+function keepTooltipOnScreen(tooltip){
+    var margin=8;
+    var rect=tooltip.getBoundingClientRect();
+    var shift=0;
+    if(rect.left<margin)shift=margin-rect.left;
+    else if(rect.right>window.innerWidth-margin)shift=(window.innerWidth-margin)-rect.right;
+    if(shift)tooltip.style.transform='translateX(calc(-50% + '+Math.round(shift)+'px))';
+    if(rect.top<margin){
+        tooltip.style.bottom='auto';
+        tooltip.style.top='calc(100% + 8px)';
+    }
+}
+
+// Tap or click a word to open its details; tap anywhere else to close them.
+document.addEventListener('click',function(e){
+    if(e.target.closest('.tooltip'))return;
+    var wordSpan=e.target.closest('.word-span');
+    if(wordSpan){
+        // A tap also fires focus and mouseover, which already opened it; only a later tap closes it.
+        if(activeTooltipWord===wordSpan&&e.pointerType!=='mouse'&&Date.now()-tooltipOpenedAt>400)hideActiveTooltip();
+        else positionTooltip(wordSpan);
+        return;
+    }
+    if(activeTooltipWord)hideActiveTooltip();
+});
+
+// Keyboard: focusing a word opens its details, leaving it closes them.
+document.addEventListener('focusin',function(e){
+    var wordSpan=e.target.closest&&e.target.closest('.word-span');
+    if(wordSpan&&e.target===wordSpan)positionTooltip(wordSpan);
+});
+document.addEventListener('focusout',function(e){
+    var wordSpan=e.target.closest&&e.target.closest('.word-span');
+    if(wordSpan&&activeTooltipWord===wordSpan&&!wordSpan.contains(e.relatedTarget))scheduleTooltipHide();
+});
 
 document.addEventListener('mouseover',function(e){
     var wordSpan=e.target.closest('.word-span');
@@ -1939,6 +1992,8 @@ document.addEventListener('mouseover',function(e){
 });
 
 document.addEventListener('mouseout',function(e){
+    // Touch screens send a fake "mouse left" after every tap; only a tap elsewhere closes details there.
+    if(lastPointerType==='touch')return;
     var wordSpan=e.target.closest('.word-span');
     if(wordSpan&&activeTooltipWord===wordSpan){
         scheduleTooltipHide();
@@ -2244,7 +2299,7 @@ async function ensureKaraokeData(){
                     if(applyKaraokePayload(cachedPayload))return true;
                 }
             }
-            setStoryStatus('Preparing word sync...','working');
+            setStoryStatus('Preparing word sync…','working');
             var response=await fetch('/api/stories/tts-marked',{
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
@@ -2347,7 +2402,7 @@ async function playStoryAudio(provider){
     }
 
     setStoryTtsButtonsBusy(provider,true);
-    setStoryStatus('Creating Google narration...','working');
+    setStoryStatus('Creating Google narration…','working');
     try{
         var r=await fetch('/api/stories/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:provider,text:currentStory.story_text,language:currentStory.target_lang||$('storyTargetLang').value,story_id:currentStory.id||null})});
         if(!r.ok){
@@ -2516,7 +2571,7 @@ async function generateStory(){
         if((d.word_data||[]).length>0){
             setStoryStatus(readyMessage,'ready');
         }else{
-            setStoryStatus(d.personalized?'Tailored to your vocabulary. Adding hoverable word analysis in the background...':'Story ready. Adding hoverable word analysis in the background...','working');
+            setStoryStatus(d.personalized?'Tailored to your vocabulary. Adding hoverable word analysis in the background…':'Story ready. Adding hoverable word analysis in the background…','working');
             startStoryWordAnalysis(d,readyMessage);
         }
     }catch(e){
@@ -2533,7 +2588,7 @@ async function generateStory(){
 
 async function openSavedStory(storyId){
     try{
-        setStoryStatus('Opening saved story...','working');
+        setStoryStatus('Opening saved story…','working');
         var r=await fetch('/api/stories/'+storyId);
         var d=await r.json();
         if(d.error)throw new Error(d.error);
@@ -2547,7 +2602,7 @@ async function openSavedStory(storyId){
         openStoryReader();
         applyCachedStoryAudio(story);
         if(story.story_text&&story.word_data.length===0){
-            setStoryStatus('Story loaded. Adding hoverable word analysis in the background...','working');
+            setStoryStatus('Story loaded. Adding hoverable word analysis in the background…','working');
             startStoryWordAnalysis(story,'Story ready. Hover words to inspect and save vocabulary.');
         }else{
             setStoryStatus('Loaded from your saved stories.','ready');
@@ -2635,5 +2690,7 @@ requestAnimationFrame(syncModeStageHeight);
             if(!isNaN(sid))currentFlashcardSetId=sid;
         }
         setMode('flashcards');
+    }else if(['compare','stories','practice'].indexOf(route)!==-1){
+        setMode(route);
     }
 })();

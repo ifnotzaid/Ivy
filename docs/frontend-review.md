@@ -3,9 +3,28 @@
 Checked against Vercel's Web Interface Guidelines (`.claude/skills/web-design-guidelines`) and the
 screenshots in `docs/screenshots/`. Paths are relative to the repo root.
 
+## Status (polish pass, Nov 2026)
+
+Fixed on the `frontend-redesign` branch:
+
+- Section 1: all user content is escaped; Escape no longer clears input.
+- Section 2: word details open on tap and keyboard focus and stay on screen; phone header
+  puts the mode tabs on their own scrollable row. Touch styles added.
+- Section 3: one `h1` per page, heading levels fixed, icon buttons labelled, clickable cards
+  keyboard-reachable, labels linked, `autocomplete` on auth fields, `aria-current` on tabs,
+  live regions on status text, visible `:focus-visible` rings.
+- Section 4: no `transition: all`, `…` everywhere, toasts instead of `alert()`, image sizes,
+  `theme-color` and `color-scheme`, mode and Community tab kept in the URL, tabular digits,
+  12px minimum text, sentence-case labels, readable grey (`--text-3`), glows removed,
+  light theme on `/sets`.
+- Section 5: CSS and JS moved to `app/static/css/` and `app/static/js/`.
+
+Not changed: `confirm()` is still used before deleting a set or removing a friend (it is a
+real confirmation, just browser-styled). Formal stays violet; see `DESIGN.md`.
+
 ## Overall
 
-The frontend is two pages: `app/templates/index.html` (6,449 lines: ~3,500 CSS, ~250 HTML,
+The frontend was two pages (before this pass): `app/templates/index.html` (6,449 lines: ~3,500 CSS, ~250 HTML,
 ~2,650 JS, all in one file) and `app/templates/sets.html` (817 lines). The dark green look is clean
 and consistent, and the core features work. The main problems are:
 
