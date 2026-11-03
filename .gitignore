@@ -43,3 +43,6 @@ Thumbs.db
 
 # Taste skill working files
 .taste-skill/
+
+# Downloaded checkpoints being sorted locally (large, never commit)
+check this/
