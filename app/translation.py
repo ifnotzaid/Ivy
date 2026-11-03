@@ -140,6 +140,56 @@ NEUTRAL_RULE = (
     "in the sense a learner most likely means, as a single word or short phrase. No alternatives, no explanation."
 )
 
+# Ivy is for learners: neutral and casual show what the words really say.
+# Formal keeps its own rule (clean, respectful equivalents).
+PROFANITY_RULE = (
+    "Profanity, swearing, slurs and insults must be translated faithfully. Keep every one, each with an "
+    "equivalent of the same strength and vulgarity in the target language. Write them out in full: never "
+    "abbreviate (Turkish 'amına koyayım', not 'amk' or 'aq'; English 'what the fuck', not 'wtf'), never "
+    "censor with asterisks, never soften, never swap in a milder word, never leave one out. "
+    "Equally, never add swearing that is not in the source and never make it stronger: 'asshole' is "
+    "'pislik' or 'göt herif', not 'orospu çocuğu'. "
+    "Learners use this to understand what the words really mean."
+)
+
+# Models still abbreviate sometimes ("amk"). Spell the common ones out.
+_SPELLED_OUT = [
+    (re.compile(r"\b(?:amk|aq|amq)\b", re.IGNORECASE), "amına koyayım"),
+    (re.compile(r"\bmk\b", re.IGNORECASE), "amına koyayım"),
+    (re.compile(r"\bwtf\b", re.IGNORECASE), "what the fuck"),
+    (re.compile(r"\bstfu\b", re.IGNORECASE), "shut the fuck up"),
+    (re.compile(r"\bgtfo\b", re.IGNORECASE), "get the fuck out"),
+    (re.compile(r"\bmf\b", re.IGNORECASE), "motherfucker"),
+]
+
+
+def spell_out_profanity(text: str) -> str:
+    """Replace abbreviated swearing with the full words, keeping a leading capital."""
+    for pattern, full in _SPELLED_OUT:
+        def replace(match, full=full):
+            word = match.group(0)
+            return full[0].upper() + full[1:] if word[0].isupper() else full
+        text = pattern.sub(replace, text)
+    return text
+
+# Common swear words in Ivy's four languages. When the source has one, Neutral
+# goes to Gemini, because opus-mt quietly drops or softens them.
+PROFANITY_RE = re.compile(
+    r"\b(?:"
+    r"fuck\w*|f\*+k\w*|shit\w*|bitch\w*|asshole\w*|arsehole\w*|bastard\w*|cunt\w*|dickhead\w*|"
+    r"motherfuck\w*|wtf|stfu|piss\w*|slut\w*|whore\w*|damn\w*|crap\w*|twat\w*|wanker\w*|"
+    r"sik\w*|s[iı]kt[iı]r\w*|amk|aq|am[iı]n[aı]?\w*|orospu\w*|piç\w*|göt\w*|yarra[kğ]\w*|"
+    r"kahpe\w*|[iı]bne\w*|[sş]erefsiz\w*|pezevenk\w*|"
+    r"schei(?:ß|ss)\w*|fick\w*|arsch\w*|hure\w*|fotze\w*|wichser\w*|schlampe\w*|verdammt\w*|"
+    r"х[уy][йяеёюи]\w*|пизд\w*|бля\w*|[её]б\w*|сук\w*|муда\w*|говн\w*|нахуй|залуп\w*|шлюх\w*"
+    r")",
+    re.IGNORECASE | re.UNICODE,
+)
+
+
+def has_profanity(text: str) -> bool:
+    return bool(PROFANITY_RE.search(text or ""))
+
 STYLE_RULES = {
     "formal": {
         "Turkish": "Use 'siz' conjugation (-siniz, -iniz, -nız). 'gel' becomes 'gelin'. Do NOT add 'lütfen' unless 'please' was in the original. Remove any profanity or vulgar language entirely — replace with clean, polite equivalents. The tone should be respectful and measured.",
@@ -236,6 +286,15 @@ def gemini_translate_styled(text: str, source_lang: str, target_lang: str, style
     src_name = LANGUAGES[source_lang]
     tgt_name = LANGUAGES[target_lang]
     rules = NEUTRAL_RULE if style == "neutral" else STYLE_RULES.get(style, {}).get(tgt_name, "")
+    if style != "formal":
+        rules = f"{rules}\n\n{PROFANITY_RULE}"
+        # Naming the words makes the model far less likely to drop one.
+        found = list(dict.fromkeys(m.group(0) for m in PROFANITY_RE.finditer(text)))
+        if found:
+            rules += (
+                f"\nThe source contains these swear words: {', '.join(found)}. "
+                "Each one must appear in your translation at the same strength."
+            )
     meta = CASUAL_META_RULES if style == "casual" else STRICT_META_RULES
 
     prompt = f"""Translate this {src_name} text into {tgt_name} with a {style} tone.
@@ -247,10 +306,13 @@ def gemini_translate_styled(text: str, source_lang: str, target_lang: str, style
 Text: {text}"""
 
     try:
-        raw = gemini.generate(prompt, temperature=0.2, max_tokens=512)
+        # Neutral should be the same every time; casual may vary a little.
+        raw = gemini.generate(prompt, temperature=0.0 if style == "neutral" else 0.2, max_tokens=512)
         result = gemini.strip_wrapping_quotes(raw)
         if target_lang == "tr" and style == "casual":
             result = revise_turkish_casual_output(text, result)
+        if style != "formal":
+            result = spell_out_profanity(result)
     except Exception as exc:
         print(f"  Gemini translate error: {str(exc)[:200]}")
         return opus_translate(text, source_lang, target_lang)
@@ -261,7 +323,36 @@ Text: {text}"""
     if len(result) < 2 and len(text) >= 2:
         return opus_translate(text, source_lang, target_lang)
 
+    if style != "formal":
+        result = _restore_dropped_profanity(prompt, text, result, style)
+
     _style_cache[cache_key] = result
+    return result
+
+
+def _profanity_count(text: str) -> int:
+    return len(PROFANITY_RE.findall(text or ""))
+
+
+def _restore_dropped_profanity(prompt: str, source: str, result: str, style: str) -> str:
+    """One retry when the translation has fewer swear words than the source."""
+    if _profanity_count(result) >= _profanity_count(source):
+        return result
+
+    retry = (
+        f"{prompt}\n\nA previous attempt was: {result}\n"
+        "It dropped or softened some of the swear words. Translate the text again so that every "
+        "swear word in the source appears at full strength. Output ONLY the translation."
+    )
+    try:
+        second = spell_out_profanity(gemini.strip_wrapping_quotes(gemini.generate(retry, temperature=0.3, max_tokens=512)))
+    except Exception as exc:
+        print(f"  Profanity retry skipped: {str(exc)[:120]}")
+        return result
+
+    if len(second) >= 2 and _profanity_count(second) > _profanity_count(result):
+        print(f"  [Gemini] {style} retry kept the swearing: '{result}' -> '{second}'")
+        return second
     return result
 
 
@@ -285,6 +376,10 @@ def gemini_restyle_same_language(text: str, language: str, style: str) -> str:
         )
     elif language == "tr" and style == "formal":
         extra_rules = "- Turkish formal: use respectful written Turkish. Use 'siz' forms when addressing someone; avoid slang and chatty particles.\n"
+    if style == "casual":
+        extra_rules += f"- {PROFANITY_RULE}\n"
+    else:
+        extra_rules += "- Formal: replace any profanity or insults with clean, respectful wording that keeps the intent.\n"
 
     prompt = f"""Restyle this {lang_name} text to sound {style}. Keep the SAME language ({lang_name}) — do NOT translate.
 
@@ -330,7 +425,7 @@ def translate_with_style(text: str, source_lang: str, target_lang: str, style: s
 
     if style == "neutral":
         short = len(text.split()) <= SHORT_INPUT_WORDS
-        if short or looks_untranslated(text, base):
+        if short or has_profanity(text) or looks_untranslated(text, base):
             return {"base_translation": base, "styled_translation": gemini_translate_styled(text, source_lang, target_lang, "neutral")}
         return {"base_translation": base, "styled_translation": base}
 
