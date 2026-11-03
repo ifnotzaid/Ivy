@@ -96,7 +96,16 @@ Tokens live in `:root` (dark, the default) and `body[data-theme="light"]` at the
   border instead. Never remove focus styles without a replacement.
 - Transitions list their properties (never `transition: all`) and animate colour, opacity and
   transform only.
-- `prefers-reduced-motion: reduce` turns transitions and animations off.
+- Micro-interactions live in `app/static/css/motion.css` and `app/static/js/motion.js`, using
+  the tokens at the top of `motion.css` (`--ease-out`, `--t-press` 140ms, `--t-hover` 180ms,
+  `--t-ui` 240ms, `--t-reveal` 700ms). Each move confirms something: a press gives
+  (`scale(0.96)`), the active mode tab is one pill that slides, a new view rises in, a
+  translation's words arrive in reading order while the old one stays dimmed until then, tone
+  bars glide to their new value and the percentages count, Compare cards arrive one by one,
+  a reviewed flashcard leaves before the next comes in, a wrong practice answer shakes once.
+  No bounce or overshoot, no loops except loading dots, nothing on hover for touch screens.
+- `prefers-reduced-motion: reduce` means gentler, not nothing: things still fade in, but nothing
+  travels, scales, turns or shakes (the reduced block at the end of `motion.css`).
 - Escape closes menus, modals and panels. It never clears what the user typed.
 - Theme choice is stored in `localStorage['ivy-theme']` and applied on both pages.
 

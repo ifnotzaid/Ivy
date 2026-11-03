@@ -1,0 +1,383 @@
+/*
+ * motion.css - Ivy's micro-interactions.
+ *
+ * Loaded after ivy.css. Small, quick moves that confirm what just happened:
+ * a press gives under the finger, the active tab slides, a translation's
+ * words arrive in reading order, tone bars glide to their new value.
+ * Only transform and opacity move. Under prefers-reduced-motion the finished
+ * state shows at once (see the bottom of this file and of ivy.css).
+ */
+
+:root {
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+    --ease-exit: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    --t-press: 140ms;
+    --t-hover: 180ms;
+    --t-ui: 240ms;
+    --t-reveal: 700ms;
+}
+
+/* ── Press: everything you can press gives a little ─────────────────────── */
+.mode-tab,
+.style-chip,
+.swap-btn,
+.theme-toggle,
+.avatar-btn,
+.speak-btn,
+.ivy-why-btn,
+.copy-translation-btn,
+.tooltip-save,
+.fc-btn,
+.practice-option,
+.practice-start-btn,
+.practice-secondary-btn,
+.story-action,
+.filter-chip,
+.flashcard-filter,
+.form-btn {
+    transition-property: background-color, border-color, color, opacity, transform;
+    transition-duration: var(--t-hover), var(--t-hover), var(--t-hover), var(--t-hover), var(--t-press);
+    transition-timing-function: ease, ease, ease, ease, var(--ease-out);
+}
+
+.mode-tab:active,
+.style-chip:active,
+.swap-btn:active,
+.theme-toggle:active,
+.avatar-btn:active,
+.speak-btn:active,
+.ivy-why-btn:active,
+.copy-translation-btn:active,
+.tooltip-save:active,
+.fc-btn:active,
+.practice-option:not(:disabled):active,
+.practice-start-btn:active,
+.practice-secondary-btn:active,
+.story-action:not(:disabled):active,
+.filter-chip:active,
+.flashcard-filter:active,
+.form-btn:active {
+    transform: scale(0.96);
+}
+
+/* ── Mode tabs: one pill that slides to the tab you picked ───────────────── */
+.mode-tabs.has-indicator {
+    position: relative;
+    isolation: isolate;
+}
+
+.mode-tab-indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    width: 0;
+    border-radius: 7px;
+    background: var(--card);
+    z-index: -1;
+    pointer-events: none;
+    transform: translateX(var(--x, 0));
+    transition: transform 360ms var(--ease-out), width 360ms var(--ease-out), background-color 0.28s ease;
+}
+
+/* On the light theme the card and the tab track are one shade apart; a 1px edge shows the active tab. */
+body[data-theme="light"] .mode-tab-indicator {
+    outline: 1px solid var(--border-lit);
+    outline-offset: -1px;
+}
+
+.mode-tab-indicator.no-anim {
+    transition: none;
+}
+
+.mode-tabs.has-indicator .mode-tab.active {
+    background: transparent;
+}
+
+/* ── A view you switch to rises in ───────────────────────────────────────── */
+@keyframes ivyViewIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+.view-enter {
+    animation: ivyViewIn 320ms var(--ease-out) both;
+}
+
+/* ── Swap: the arrows turn, the language names trade places ──────────────── */
+.swap-btn .swap-glyph {
+    display: inline-block;
+    transition: transform 420ms var(--ease-in-out);
+}
+
+.swap-btn.is-turned .swap-glyph {
+    transform: rotate(180deg);
+}
+
+@keyframes ivySwapIn {
+    from { opacity: 0.2; transform: translateY(var(--from, 6px)); }
+    to { opacity: 1; transform: none; }
+}
+
+.lang-swapped {
+    animation: ivySwapIn 300ms var(--ease-out) both;
+}
+
+/* ── Register chips: the chosen one settles in ───────────────────────────── */
+@keyframes ivyChipOn {
+    from { transform: scale(0.94); }
+    to { transform: none; }
+}
+
+.style-chip.just-picked {
+    animation: ivyChipOn 260ms var(--ease-out);
+}
+
+/* ── Translation: the old one waits, the new one arrives word by word ────── */
+.panel-output {
+    transition: opacity 200ms ease;
+}
+
+.panel-output.is-stale {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+@keyframes ivyWordIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes ivyRise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+.panel-output.is-arriving {
+    animation: ivyRise 420ms var(--ease-out) both;
+}
+
+.panel-output.is-arriving .word-span {
+    animation: ivyWordIn 380ms ease both;
+    animation-delay: calc(min(var(--i, 0), 18) * 24ms);
+}
+
+.panel-output.is-failed {
+    color: var(--danger);
+}
+
+/* A quiet line under the output when Gemini's daily quota is used up. */
+.ai-notice {
+    margin: 10px 2px 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-2);
+    display: none;
+}
+
+.ai-notice.visible {
+    display: block;
+    animation: ivyRise 300ms var(--ease-out) both;
+}
+
+/* ── Tone bars: they glide to the new value instead of jumping ───────────── */
+.bar-fill {
+    width: 100%;
+    transform-origin: left center;
+    transform: scaleX(var(--p, 0));
+    transition: transform var(--t-reveal) var(--ease-expo);
+}
+
+.bar-pct {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Compare: the three versions arrive one after another ────────────────── */
+.compare-card.is-arriving {
+    animation: ivyRise 460ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+.compare-text.is-waiting {
+    color: var(--text-3);
+}
+
+/* ── Word details: saving a word gives a small confirmation ──────────────── */
+@keyframes ivySaved {
+    0% { transform: scale(0.96); }
+    100% { transform: none; }
+}
+
+.tooltip-save.saved {
+    animation: ivySaved 260ms var(--ease-out);
+}
+
+/* ── Flashcards: the answer opens, done cards leave, new ones come in ────── */
+.flashcard-answer {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 320ms var(--ease-out), opacity 240ms ease;
+}
+
+.flashcard-answer > .flashcard-answer-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.flashcard.flipped .flashcard-answer {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+@keyframes ivyCardIn {
+    from { opacity: 0; transform: translateX(28px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes ivyCardOut {
+    from { opacity: 1; transform: none; }
+    to { opacity: 0; transform: translateX(-28px); }
+}
+
+.flashcard.is-entering {
+    animation: ivyCardIn 300ms var(--ease-out) both;
+}
+
+.flashcard.is-leaving {
+    animation: ivyCardOut 170ms var(--ease-exit) both;
+    pointer-events: none;
+}
+
+/* ── Practice: right answers settle, wrong ones shake once ───────────────── */
+.practice-progress-fill {
+    box-shadow: none; /* removes the old glow; taste-skill-ignore */
+    transition: width 420ms var(--ease-out);
+}
+
+@keyframes ivyShake {
+    0%, 100% { transform: none; }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+}
+
+.practice-option.is-wrong {
+    animation: ivyShake 360ms var(--ease-out);
+}
+
+@keyframes ivyBlankFill {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+.practice-blank.filled,
+.practice-blank.wrong {
+    display: inline-block;
+    animation: ivyBlankFill 300ms var(--ease-out) both;
+}
+
+.practice-option.is-arriving {
+    animation: ivyRise 320ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@keyframes ivyTick {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+}
+
+.ticked {
+    display: inline-block;
+    animation: ivyTick 240ms var(--ease-out);
+}
+
+.practice-results-score,
+.practice-score-line {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Theme switch: the icon turns as the theme changes ───────────────────── */
+.theme-toggle-icon {
+    display: inline-flex;
+    transition: transform 420ms var(--ease-out);
+}
+
+.theme-toggle.is-turning .theme-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+/* ── Stories: a new story's paragraphs arrive in reading order ───────────── */
+.story-arrive {
+    animation: ivyRise 460ms var(--ease-out) both;
+    animation-delay: calc(min(var(--i, 0), 4) * 80ms);
+}
+
+/* ── Hover, only where there is a real pointer ───────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+    .swap-btn:hover .swap-glyph {
+        transform: rotate(90deg);
+    }
+
+    .swap-btn.is-turned:hover .swap-glyph {
+        transform: rotate(270deg);
+    }
+}
+
+/*
+ * Reduced motion means gentler, not nothing: things still fade in so you can
+ * see what changed, but nothing travels, scales, turns or shakes.
+ * (ivy.css cuts every duration to 0.01ms under this setting; the rules here
+ * are more specific, so they win for the fades listed.)
+ */
+@keyframes ivyFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .panel-output.is-arriving,
+    .compare-card.is-arriving,
+    .view-enter,
+    .story-arrive,
+    .flashcard.is-entering,
+    .practice-option.is-arriving,
+    .ai-notice.visible {
+        animation: ivyFade 220ms ease both !important;
+    }
+
+    .panel-output.is-arriving .word-span {
+        animation: ivyWordIn 260ms ease both !important;
+        animation-delay: calc(min(var(--i, 0), 18) * 16ms) !important;
+    }
+
+    .panel-output {
+        transition: opacity 200ms ease !important;
+    }
+
+    .flashcard-answer {
+        transition: opacity 200ms ease !important;
+    }
+
+    .flashcard.is-leaving,
+    .practice-option.is-wrong,
+    .practice-blank.filled,
+    .practice-blank.wrong,
+    .ticked,
+    .lang-swapped,
+    .style-chip.just-picked,
+    .tooltip-save.saved {
+        animation: none !important;
+    }
+
+    .bar-fill,
+    .mode-tab-indicator,
+    .swap-btn .swap-glyph,
+    .theme-toggle-icon {
+        transition: none !important;
+    }
+}
