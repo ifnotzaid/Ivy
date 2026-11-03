@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="/static/css/ivy.css">
+<link rel="stylesheet" href="/static/css/motion.css">
     </head>
 <body>
 
@@ -105,6 +106,7 @@
 <div class="panel"><textarea class="panel-input" id="inputArea" aria-label="Text to translate" placeholder="Start typing to translate…"></textarea><div class="panel-footer"><div class="detected-badge" id="detectedBadge"><div class="detected-dot" id="detectedDot"></div><span>Detected: <strong id="detectedText"></strong></span></div><div style="display:flex;align-items:center;gap:12px;"><span class="char-count" id="charCount">0</span><button class="clear-btn" type="button" onclick="clearInput()" aria-label="Clear text"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div></div>
 <div class="panel" id="outputPanel"><div class="panel-output empty" id="outputArea" aria-live="polite" data-hint="Tap or hover a translated word to see its meaning and grammar, and save it to your vocabulary."></div><div class="panel-footer"><div class="output-actions"><div class="typing-indicator" id="typingIndicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><button class="speak-btn" id="speakBtn" onclick="speakTranslation()" style="display:none;" aria-label="Listen to translation" title="Listen to translation"><img src="/static/speaker-icon-dark-128.png" alt="" id="speakerIcon" width="21" height="21"></button><button class="ivy-why-btn" id="ivyWhyBtn" onclick="askIvyWhy()" aria-label="Ask Ivy to break this sentence down" title="Ask Ivy why"><img src="/static/logo-mark-dark-128.png" alt="" id="ivyWhyLogo" width="20" height="20"></button></div><div class="output-meta-actions"><span class="vulgar-warning" id="vulgarBadge">contains profanity</span><button class="copy-translation-btn" id="copyTranslationBtn" onclick="copyTranslation()" type="button" aria-label="Copy translation" title="Copy translation">Copy</button><span class="char-count" id="outCharCount">&nbsp;</span></div></div></div>
 </div>
+<p class="ai-notice" id="aiNotice" role="status"></p>
 <div class="pos-legend" id="posLegend" style="display:none"><div class="pos-item"><div class="pos-dot" style="background:var(--noun)"></div>noun</div><div class="pos-item"><div class="pos-dot" style="background:var(--verb)"></div>verb</div><div class="pos-item"><div class="pos-dot" style="background:var(--adj)"></div>adj</div><div class="pos-item"><div class="pos-dot" style="background:var(--adv)"></div>adv</div><div class="pos-item pos-hint">Tap or hover a word for details</div></div>
 <div class="analysis-row" id="analysisRow" style="display:none"><div class="analysis-card"><div class="analysis-title">Input tone</div><div id="inputBars"></div></div><div class="analysis-card"><div class="analysis-title">Output tone</div><div id="outputBars"></div></div></div>
 
@@ -267,5 +269,6 @@
 </div>
 
 <script src="/static/js/ivy.js"></script>
+<script src="/static/js/motion.js"></script>
 </body>
 </html>

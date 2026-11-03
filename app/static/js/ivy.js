@@ -77,16 +77,28 @@ function toggleTheme(){
 }
 
 function setOutputEmpty(title,hint){
+    outputArea.classList.remove('is-stale','is-failed','is-arriving');
     outputArea.innerHTML='';
     outputArea.dataset.hint=hint||defaultOutputHint;
     outputArea.classList.add('empty');
     outputArea.style.color='';
 }
 
+// A quiet line under the output, e.g. when Gemini's daily quota is used up.
+function showAiNotice(message){
+    var el=$('aiNotice');
+    if(!el)return;
+    var text=String(message||'');
+    if(el.textContent===text&&el.classList.contains('visible')===!!text)return;
+    el.textContent=text;
+    el.classList.toggle('visible',!!text);
+}
+
 function setCompareLoading(){
     $('cmpFormal').textContent='Preparing formal version…';
     $('cmpNeutral').textContent='Preparing neutral version…';
     $('cmpCasual').textContent='Preparing casual version…';
+    document.querySelectorAll('#compareResults .compare-text').forEach(function(el){el.classList.add('is-waiting');});
 }
 
 function escapeHtml(value){
@@ -201,22 +213,6 @@ function markFocusVocabularySaved(){
     });
 }
 
-function normalizeDisplayPos(pos,word){
-    var cleaned=String(pos||'').toLowerCase();
-    if(cleaned&&cleaned!=='other')return cleaned;
-    var token=String(word||'').replace(/[^\wığüşöçİĞÜŞÖÇäöüÄÖÜßа-яА-ЯёЁ-]/g,'');
-    if(!token)return 'other';
-    if(token[0]&&token[0]===token[0].toUpperCase()&&token[0]!==token[0].toLowerCase())return 'noun';
-    var lower=token.toLocaleLowerCase();
-    if(['ve','ama','fakat','çünkü','ile'].indexOf(lower)!==-1)return 'conj';
-    if(['bir','bu','şu','o','her'].indexOf(lower)!==-1)return 'det';
-    if(['ben','sen','o','biz','siz','onlar','kendine','kendi'].indexOf(lower)!==-1)return 'pron';
-    if(/(mak|mek|yor|dı|di|du|dü|tı|ti|tu|tü|acak|ecek|ar|er|ır|ir|ur|ür)$/.test(lower))return 'verb';
-    if(/(ca|ce|ça|çe|ken|likle)$/.test(lower))return 'adv';
-    if(/(lı|li|lu|lü|sız|siz|suz|süz)$/.test(lower))return 'adj';
-    return 'noun';
-}
-
 function focusMeaningForWord(word){
     if(!currentStory||!currentStory.focus_vocabulary)return '';
     var key=String(word||'').toLocaleLowerCase();
@@ -238,29 +234,6 @@ function sentenceForWord(text,word){
         }
     }
     return source;
-}
-
-function setStoryGeneratingState(active){
-    var btn=$('generateStoryBtn');
-    if(!btn)return;
-    if(active){
-        btn.disabled=true;
-        btn.classList.add('loading');
-        btn.innerHTML='Generating <span class="loading-dots"><span></span><span></span><span></span></span>';
-        storyFactIndex=Math.floor(Math.random()*storyFunFacts.length);
-        $('storyStatus').textContent=storyFunFacts[storyFactIndex];
-        clearInterval(storyFactTimer);
-        storyFactTimer=setInterval(function(){
-            storyFactIndex=(storyFactIndex+1)%storyFunFacts.length;
-            $('storyStatus').textContent=storyFunFacts[storyFactIndex];
-        },3500);
-    }else{
-        clearInterval(storyFactTimer);
-        storyFactTimer=null;
-        btn.disabled=false;
-        btn.classList.remove('loading');
-        btn.textContent='Generate story';
-    }
 }
 
 function saveStoryPreferences(){
@@ -298,14 +271,6 @@ function surpriseStoryTheme(){
 function openStoryReader(){
     storyReaderOpen=true;
     $('storyShell').classList.add('reader-open');
-    updateStoryShellHeight();
-    requestAnimationFrame(syncModeStageHeight);
-}
-
-function showStorySetup(){
-    storyReaderOpen=false;
-    $('storyShell').classList.remove('reader-open');
-    $('storyStatus').textContent=currentStory?'Adjust the options, then generate a new story.':'Choose a level and theme, then generate.';
     updateStoryShellHeight();
     requestAnimationFrame(syncModeStageHeight);
 }
@@ -571,6 +536,9 @@ function renderPracticeItem(){
         btn.dataset.value=opt;
         btn.innerHTML='<span class="practice-option-num">'+(i+1)+'</span><span>'+escapeHtml(opt)+'</span>';
         btn.onclick=function(){selectPracticeOption(opt,btn);};
+        btn.style.setProperty('--i',i);
+        btn.classList.add('is-arriving');
+        btn.addEventListener('animationend',function(){btn.classList.remove('is-arriving');},{once:true});
         optionsEl.appendChild(btn);
     });
     $('practiceFeedback').textContent='';
@@ -599,7 +567,7 @@ function selectPracticeOption(picked,btnEl){
     var item=practiceItems[practiceIndex];
     if(!item)return;
     var allOptions=document.querySelectorAll('#practiceOptions .practice-option');
-    allOptions.forEach(function(o){o.disabled=true;});
+    allOptions.forEach(function(o){o.disabled=true;o.classList.remove('is-arriving');});
     var correct=String(picked).toLowerCase()===String(item.answer).toLowerCase();
     var blankEl=$('practiceBlank');
     if(correct){
@@ -624,8 +592,10 @@ function selectPracticeOption(picked,btnEl){
         $('practiceFeedback').className='practice-feedback is-wrong';
         $('practiceFeedback').innerHTML='Answer: <strong>'+escapeHtml(item.answer)+'</strong>'+(item.meaning?' ('+escapeHtml(item.meaning)+')':'');
     }
+    var changed=correct?$('practiceCorrectCount'):$('practiceWrongCount');
     $('practiceCorrectCount').textContent=String(practiceCorrect);
     $('practiceWrongCount').textContent=String(practiceWrong);
+    if(window.ivyReplay)ivyReplay(changed,'ticked');
     $('practiceNextBtn').style.display='inline-flex';
     fetch('/api/practice/answer',{
         method:'POST',
@@ -644,7 +614,8 @@ function finishPracticeQuiz(){
     var total=practiceCorrect+practiceWrong;
     var pct=total?Math.round((practiceCorrect/total)*100):0;
     $('practiceResultsScore').textContent=practiceCorrect+'/'+total;
-    $('practiceResultsPct').textContent=pct+'% correct';
+    if(window.ivyCountTo){$('practiceResultsPct').dataset.value='0';ivyCountTo($('practiceResultsPct'),pct,'% correct');}
+    else $('practiceResultsPct').textContent=pct+'% correct';
     var msg='Tough round. The words you missed will come back sooner in review.';
     if(pct>=90)msg='Excellent recall. These words are sticking.';
     else if(pct>=70)msg='Solid work. A few words are ready for another pass.';
@@ -780,52 +751,25 @@ function showFlashcard(){
     if(fcIndex>=flashcards.length){$('fcContent').innerHTML='<div class="flashcard-done"><h2>Session complete!</h2><p>Reviewed '+flashcards.length+' cards</p></div>';$('fcActions').style.display='none';requestAnimationFrame(syncModeStageHeight);return;}
     var c=flashcards[fcIndex];var tags='';if(c.pos)tags+='<span class="vocab-tag tag-pos">'+escapeHtml(c.pos)+'</span>';if(c.grammatical_case)tags+='<span class="vocab-tag tag-case">'+escapeHtml(c.grammatical_case)+'</span>';if(c.difficulty)tags+='<span class="vocab-tag tooltip-cefr cefr-'+escapeHtml(c.difficulty)+'">'+escapeHtml(c.difficulty)+'</span>';
     $('fcProgress').textContent=flashcardDeckLabel()+' - card '+(fcIndex+1)+' of '+flashcards.length;
-    $('fcContent').innerHTML='<div class="flashcard" onclick="this.classList.toggle(\'flipped\')"><div class="flashcard-lang">'+(langNames[c.target_lang]||c.target_lang)+'</div><div class="flashcard-word">'+escapeHtml(c.word)+'</div>'+(c.base_form&&c.base_form!==c.word?'<div class="flashcard-base">'+escapeHtml(c.base_form)+'</div>':'')+'<div class="flashcard-tags">'+tags+'</div><div class="flashcard-reveal">tap to reveal</div><div class="flashcard-answer"><div class="flashcard-meaning">'+escapeHtml(c.meaning||'—')+'</div>'+(c.sentence?'<div class="flashcard-sentence">'+escapeHtml(c.sentence)+'</div>':'')+'</div></div>';
+    $('fcContent').innerHTML='<div class="flashcard" onclick="this.classList.toggle(\'flipped\')"><div class="flashcard-lang">'+(langNames[c.target_lang]||c.target_lang)+'</div><div class="flashcard-word">'+escapeHtml(c.word)+'</div>'+(c.base_form&&c.base_form!==c.word?'<div class="flashcard-base">'+escapeHtml(c.base_form)+'</div>':'')+'<div class="flashcard-tags">'+tags+'</div><div class="flashcard-reveal">tap to reveal</div><div class="flashcard-answer"><div class="flashcard-answer-inner"><div class="flashcard-meaning">'+escapeHtml(c.meaning||'—')+'</div>'+(c.sentence?'<div class="flashcard-sentence">'+escapeHtml(c.sentence)+'</div>':'')+'</div></div></div>';
+    if(window.ivyReplay)ivyReplay($('fcContent').querySelector('.flashcard'),'is-entering');
     $('fcActions').style.display='flex';
     requestAnimationFrame(syncModeStageHeight);
 }
-async function reviewCard(q){var c=flashcards[fcIndex];try{await fetch('/api/flashcards/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vocab_id:c.id,quality:q})});}catch(e){}fcIndex++;showFlashcard();}
-
-function renderStoryContent(story){
-    currentStory=story;
-    currentStory.saved=!!story.saved;
-    currentStory.audio_url=currentStory.audio_url||'';
-    resetStoryAudioPlayer();
-    lastTranslation=story.story_text||'';
-    lastTranslationSource='story';
-    lastWordData=story.word_data||[];
-    activeWordSourceText=story.story_text||'';
-    activeWordTranslationText=story.summary||'';
-    activeWordSourceLang=story.target_lang||$('storyTargetLang').value;
-    activeWordTargetLang=story.target_lang||$('storyTargetLang').value;
-    activeWordStyle=story.style||$('storyStyle').value;
-
-    $('storyMeta').innerHTML=
-        '<span class="story-badge level">'+escapeHtml(story.cefr_level||'A2')+'</span>'+
-        '<span class="story-badge theme">'+escapeHtml(story.theme||'daily life')+'</span>'+
-        '<span class="story-badge length">'+escapeHtml(story.length_label||'short')+'</span>'+
-        '<span class="story-badge style">'+escapeHtml(story.style||'neutral')+'</span>';
-    $('storyTitle').textContent=story.title||'Untitled story';
-    if((story.word_data||[]).length>0){
-        $('storyText').innerHTML=renderWords(story.word_data||[],{storyAudio:true,sourceText:story.story_text||''});
-        $('storyText').classList.remove('empty');
-    }else{
-        $('storyText').textContent=story.story_text||'';
-        $('storyText').classList.toggle('empty',!(story.story_text||''));
-    }
-    $('storySummary').textContent=story.summary||'No summary returned.';
-    $('storyQuestions').innerHTML=(story.comprehension_questions||[]).length?(story.comprehension_questions||[]).map(function(item){
-        return '<div class="story-question"><div class="story-question-q">'+escapeHtml(item.question||'')+'</div><div class="story-question-a">'+escapeHtml(item.answer||'')+'</div></div>';
-    }).join(''):'<div class="story-empty">Three quick check questions will appear here.</div>';
-    $('storyVocab').innerHTML=(story.focus_vocabulary||[]).length?(story.focus_vocabulary||[]).map(function(item,index){
-        return '<div class="story-vocab-item"><div class="story-vocab-main"><div class="story-vocab-word">'+escapeHtml(item.word||'')+'</div><div class="story-vocab-meaning">'+escapeHtml(item.meaning||'')+'</div></div><button class="story-vocab-save" data-index="'+index+'" onclick="saveFocusWord(event,'+index+')">+</button></div>';
-    }).join(''):'<div class="story-empty">Vocabulary targets will appear here after generation.</div>';
-    updateSaveStoryButton();
-    if(savedVocabLang===story.target_lang){
-        markFocusVocabularySaved();
-    }else{
-        refreshSavedVocabState(story.target_lang).then(markFocusVocabularySaved);
-    }
+async function reviewCard(q){
+    var c=flashcards[fcIndex];
+    if(!c||reviewCard.busy)return;
+    reviewCard.busy=true;
+    var card=$('fcContent').querySelector('.flashcard');
+    var leaving=new Promise(function(resolve){
+        if(!card||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return resolve();
+        card.classList.add('is-leaving');
+        setTimeout(resolve,170);
+    });
+    try{await fetch('/api/flashcards/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vocab_id:c.id,quality:q})});}catch(e){}
+    await leaving;
+    reviewCard.busy=false;
+    fcIndex++;showFlashcard();
 }
 
 function updateSaveStoryButton(state){
@@ -889,49 +833,6 @@ async function saveFocusWord(event,index){
         refreshVocabCounts();
     }catch(e){
         btn.textContent='!';
-    }
-}
-
-async function generateStory(){
-    if(isGeneratingStory)return;
-    isGeneratingStory=true;
-    $('saveStoryBtn').disabled=true;
-    saveStoryPreferences();
-    setStoryGeneratingState(true);
-    try{
-        var payload={
-            target_lang:$('storyTargetLang').value,
-            support_lang:$('storySupportLang').value,
-            cefr_level:$('storyLevel').value,
-            theme:$('storyTheme').value.trim()||'daily life',
-            length_label:$('storyLength').value,
-            style:$('storyStyle').value,
-            variation_id:Date.now()+'-'+Math.random().toString(36).slice(2)
-        };
-        var d=null;
-        while(isGeneratingStory){
-            var r=await fetch('/api/stories/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-            d=await r.json();
-            if(!d.error)break;
-            var errorText=String(d.error||'').toLowerCase();
-            if(errorText.indexOf('not configured')!==-1||errorText.indexOf('api key')!==-1){
-                throw new Error(d.error);
-            }
-            $('storyStatus').textContent='Gemini is busy, so Ivy is still trying. '+storyFunFacts[storyFactIndex];
-            await new Promise(function(resolve){setTimeout(resolve,3500);});
-        }
-        renderStoryContent(d);
-        openStoryReader();
-        $('storyStatus').textContent='Story ready. Hover words to inspect and save vocabulary.';
-    }catch(e){
-        currentStory=null;
-        showStorySetup();
-        $('storyStatus').textContent=e.message||'Could not generate a story yet.';
-    }finally{
-        isGeneratingStory=false;
-        setStoryGeneratingState(false);
-        updateSaveStoryButton();
-        requestAnimationFrame(syncModeStageHeight);
     }
 }
 
@@ -1001,40 +902,6 @@ async function loadSavedStories(){
         }).join('');
     }catch(e){
         $('savedStoriesList').innerHTML='<div class="story-empty">Could not load saved stories.</div>';
-    }
-}
-
-async function openSavedStory(storyId){
-    try{
-        $('storyStatus').textContent='Opening saved story…';
-        var r=await fetch('/api/stories/'+storyId);
-        var d=await r.json();
-        if(d.error)throw new Error(d.error);
-        var story=d.story||{};
-        story.comprehension_questions=safeJsonArray(story.comprehension_json);
-        story.focus_vocabulary=safeJsonArray(story.focus_vocab_json);
-        story.word_data=safeJsonArray(story.word_data_json);
-        story.saved=true;
-        renderStoryContent(story);
-        $('storyStatus').textContent='Loaded from your saved stories.';
-        setMode('stories');
-        openStoryReader();
-        if(story.story_text&&story.word_data.length===0){
-            $('storyStatus').textContent='Story loaded. Adding hoverable word analysis in the background…';
-            startStoryWordAnalysis(story,'Story ready. Hover words to inspect and save vocabulary.');
-        }
-    }catch(e){
-        $('storyStatus').textContent=e.message||'Could not open saved story.';
-    }
-}
-
-async function analyzeStoryWords(text,targetLang){
-    try{
-        var r=await fetch('/api/stories/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,target_lang:targetLang})});
-        var d=await r.json();
-        return d.word_data||[];
-    }catch(e){
-        return [];
     }
 }
 
@@ -1212,6 +1079,7 @@ function clearTranslatorOutputState(){
     $('vulgarBadge').classList.remove('visible');
     $('typingIndicator').classList.remove('visible');
     $('compareResults').style.display='none';
+    showAiNotice('');
     $('cmpFormal').textContent='';
     $('cmpNeutral').textContent='';
     $('cmpCasual').textContent='';
@@ -1711,78 +1579,6 @@ async function analyzeStoryWords(text,targetLang){
     }
 }
 
-async function generateStory(){
-    if(isGeneratingStory)return;
-    isGeneratingStory=true;
-    $('saveStoryBtn').disabled=true;
-    saveStoryPreferences();
-    setStoryGeneratingState(true);
-    try{
-        var payload={
-            target_lang:$('storyTargetLang').value,
-            support_lang:$('storySupportLang').value,
-            cefr_level:$('storyLevel').value,
-            theme:$('storyTheme').value.trim()||'daily life',
-            length_label:$('storyLength').value,
-            style:$('storyStyle').value,
-            variation_id:Date.now()+'-'+Math.random().toString(36).slice(2)
-        };
-        var d=null;
-        while(isGeneratingStory){
-            var r=await fetch('/api/stories/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-            d=await r.json();
-            if(!d.error)break;
-            var errorText=String(d.error||'').toLowerCase();
-            if(errorText.indexOf('not configured')!==-1||errorText.indexOf('api key')!==-1){
-                throw new Error(d.error);
-            }
-            $('storyStatus').textContent='Gemini is busy, so Ivy is still trying. '+storyFunFacts[storyFactIndex];
-            await new Promise(function(resolve){setTimeout(resolve,3500);});
-        }
-        renderStoryContent(d);
-        openStoryReader();
-        if((d.word_data||[]).length>0){
-            $('storyStatus').textContent='Story ready. Hover words to inspect and save vocabulary.';
-        }else{
-            $('storyStatus').textContent='Story ready. Adding hoverable word analysis in the background…';
-            startStoryWordAnalysis(d,'Story ready. Hover words to inspect and save vocabulary.');
-        }
-    }catch(e){
-        currentStory=null;
-        showStorySetup();
-        $('storyStatus').textContent=e.message||'Could not generate a story yet.';
-    }finally{
-        isGeneratingStory=false;
-        setStoryGeneratingState(false);
-        updateSaveStoryButton();
-        requestAnimationFrame(syncModeStageHeight);
-    }
-}
-
-async function openSavedStory(storyId){
-    try{
-        $('storyStatus').textContent='Opening saved story…';
-        var r=await fetch('/api/stories/'+storyId);
-        var d=await r.json();
-        if(d.error)throw new Error(d.error);
-        var story=d.story||{};
-        story.comprehension_questions=safeJsonArray(story.comprehension_json);
-        story.focus_vocabulary=safeJsonArray(story.focus_vocab_json);
-        story.word_data=enrichWordDataWithFocus(safeJsonArray(story.word_data_json),story.focus_vocabulary);
-        story.saved=true;
-        renderStoryContent(story);
-        $('storyStatus').textContent='Loaded from your saved stories.';
-        setMode('stories');
-        openStoryReader();
-        if(story.story_text&&story.word_data.length===0){
-            $('storyStatus').textContent='Story loaded. Adding hoverable word analysis in the background…';
-            startStoryWordAnalysis(story,'Story ready. Hover words to inspect and save vocabulary.');
-        }
-    }catch(e){
-        $('storyStatus').textContent=e.message||'Could not open saved story.';
-    }
-}
-
 // Auto translate
 inputArea.addEventListener('input',function(){
     var len=inputArea.value.length;$('charCount').textContent=len;
@@ -1797,6 +1593,7 @@ function scheduleTranslation(){
     abortCompareRequest();
     abortTranslateRequest();
     var requestId=++translateRequestId;
+    var hadTranslation=lastTranslationSource==='translate'&&!outputArea.classList.contains('empty');
     lastTranslationSource='';
     $('typingIndicator').classList.add('visible');
     $('speakBtn').style.display='none';
@@ -1804,7 +1601,10 @@ function scheduleTranslation(){
     $('copyTranslationBtn').classList.remove('visible','copied');
     $('copyTranslationBtn').textContent='Copy';
     closeIvyPanel();
-    setOutputEmpty('Translation appears here…',loadingOutputHint);
+    hideActiveTooltip();
+    // Keep the last translation on screen, dimmed, until the new one lands.
+    if(hadTranslation)outputArea.classList.add('is-stale');
+    else setOutputEmpty('Translation appears here…',loadingOutputHint);
     translateTimer=setTimeout(function(){doTranslate(requestId);},800);
 }
 function scheduleCompare(){
@@ -1829,6 +1629,8 @@ async function doTranslate(requestId){
     try{var r=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot),signal:controller.signal});
     var d=await r.json();
     if(!isCurrentTranslateRequest(requestId,snapshot))return;
+    if(!r.ok||d.error||typeof d.translation!=='string'){var err=new Error(d.error||'Ivy couldn’t translate that. Please try again.');err.friendly=true;throw err;}
+    showAiNotice(d.notice);
     lastTranslation=d.translation;lastWordData=d.word_data||[];lastTranslationSource='translate';
     activeWordSourceText=d.translation||'';
     activeWordTranslationText=snapshot.text;
@@ -1836,7 +1638,11 @@ async function doTranslate(requestId){
     activeWordTargetLang=snapshot.target_lang;
     activeWordStyle=snapshot.style;
     outputArea.style.color='';
+    outputArea.classList.remove('is-stale','is-failed');
     if(lastWordData.length>0){outputArea.innerHTML=renderWords(lastWordData,{sourceText:d.translation||''});$('posLegend').style.display='flex';}else{outputArea.textContent=d.translation;$('posLegend').style.display='none';}
+    // Words arrive in reading order (motion.css staggers them by --i).
+    outputArea.querySelectorAll('.word-span').forEach(function(span,i){span.style.setProperty('--i',i);});
+    if(window.ivyReplay)ivyReplay(outputArea,'is-arriving');
         outputArea.classList.remove('empty'); checkVulgar(d.translation, d.word_data); $('outCharCount').textContent=d.translation.length;$('speakBtn').style.display='inline-flex';$('ivyWhyBtn').classList.add('visible');$('copyTranslationBtn').classList.add('visible');
     var is=await detectStyleScores(snapshot.text);
     if(!isCurrentTranslateRequest(requestId,snapshot))return;
@@ -1844,7 +1650,7 @@ async function doTranslate(requestId){
     }catch(e){
         if(e&&e.name==='AbortError')return;
         if(!isCurrentTranslateRequest(requestId,snapshot))return;
-        lastTranslationSource='';outputArea.textContent='Translation failed';outputArea.classList.remove('empty');outputArea.style.color='var(--danger)';$('vulgarBadge').classList.remove('visible');$('speakBtn').style.display='none';$('ivyWhyBtn').classList.remove('visible');$('copyTranslationBtn').classList.remove('visible','copied');closeIvyPanel();$('outCharCount').innerHTML='&nbsp;';
+        lastTranslationSource='';outputArea.classList.remove('is-stale');outputArea.classList.add('is-failed');outputArea.textContent=(e&&e.friendly)?e.message:'Ivy couldn’t reach the server. Check that the app is running and try again.';outputArea.classList.remove('empty');$('vulgarBadge').classList.remove('visible');$('speakBtn').style.display='none';$('ivyWhyBtn').classList.remove('visible');$('copyTranslationBtn').classList.remove('visible','copied');closeIvyPanel();$('outCharCount').innerHTML='&nbsp;';
     }
     finally{
         if(translateAbortController===controller)translateAbortController=null;
@@ -1868,12 +1674,17 @@ async function doCompare(requestId){
     try{var r=await fetch('/api/compare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot),signal:controller.signal});
     var d=await r.json();
     if(!isCurrentCompareRequest(requestId,snapshot))return;
+    if(!r.ok||d.error||!d.results){var err=new Error(d.error||'Ivy couldn’t compare that. Please try again.');err.friendly=true;throw err;}
+    showAiNotice(d.notice);
     $('cmpFormal').textContent=d.results.formal.translation;$('cmpNeutral').textContent=d.results.neutral.translation;$('cmpCasual').textContent=d.results.casual.translation;
+    document.querySelectorAll('#compareResults .compare-text').forEach(function(el){el.classList.remove('is-waiting');});
+    document.querySelectorAll('#compareResults .compare-card').forEach(function(card,i){card.style.setProperty('--i',i);if(window.ivyReplay)ivyReplay(card,'is-arriving');});
     renderBars('compareInputBars',d.input_style);renderRadar(d.results);$('compareResults').style.display='block';requestAnimationFrame(syncModeStageHeight);
     }catch(e){
         if(e&&e.name==='AbortError')return;
         if(!isCurrentCompareRequest(requestId,snapshot))return;
-        $('cmpFormal').textContent='Compare failed';$('cmpNeutral').textContent='Try again in a moment';$('cmpCasual').textContent='';console.error(e);
+        document.querySelectorAll('#compareResults .compare-text').forEach(function(el){el.classList.remove('is-waiting');});
+        $('cmpFormal').textContent=(e&&e.friendly)?e.message:'Compare failed';$('cmpNeutral').textContent='Try again in a moment';$('cmpCasual').textContent='';console.error(e);
     }
     finally{
         if(compareAbortController===controller)compareAbortController=null;
@@ -1884,7 +1695,22 @@ async function doCompare(requestId){
 // Style detection
 async function detectStyleFn(text,bId,dId,tId){try{var r=await fetch('/api/detect-style',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})});var d=await r.json();var c={formal:'#22d3ee',casual:'#fb923c',neutral:'#64748b'};$(dId).style.background=c[d.dominant_style];$(tId).textContent=d.dominant_style;$(bId).classList.add('visible');}catch(e){}}
 async function detectStyleScores(text){try{var r=await fetch('/api/detect-style',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})});return(await r.json()).scores;}catch(e){return{formal:0.33,casual:0.33,neutral:0.34};}}
-function renderBars(id,scores){var d=[{key:'formal',label:'Formal',color:'#22d3ee'},{key:'neutral',label:'Neutral',color:'#64748b'},{key:'casual',label:'Casual',color:'#fb923c'}];$(id).innerHTML=d.map(function(x){var p=Math.round((scores[x.key]||0)*100);return'<div class="bar-row"><span class="bar-label">'+x.label+'</span><div class="bar-track"><div class="bar-fill" style="width:'+p+'%;background:'+x.color+'"></div></div><span class="bar-pct">'+p+'%</span></div>';}).join('');}
+function renderBars(id,scores){
+    var rows=[{key:'formal',label:'Formal',color:'var(--formal)'},{key:'neutral',label:'Neutral',color:'var(--neutral)'},{key:'casual',label:'Casual',color:'var(--casual)'}];
+    var box=$(id);
+    if(!box)return;
+    if(box.querySelectorAll('.bar-row').length!==rows.length){
+        box.innerHTML=rows.map(function(x){return'<div class="bar-row" data-key="'+x.key+'"><span class="bar-label">'+x.label+'</span><div class="bar-track"><div class="bar-fill" style="background:'+x.color+'"></div></div><span class="bar-pct">0%</span></div>';}).join('');
+        void box.offsetWidth; // start from empty so the first fill is seen
+    }
+    rows.forEach(function(x){
+        var p=Math.max(0,Math.min(100,Math.round((scores&&scores[x.key]||0)*100)));
+        var row=box.querySelector('.bar-row[data-key="'+x.key+'"]');
+        row.querySelector('.bar-fill').style.setProperty('--p',p/100);
+        var pct=row.querySelector('.bar-pct');
+        if(window.ivyCountTo)ivyCountTo(pct,p,'%');else pct.textContent=p+'%';
+    });
+}
 function renderRadar(results){if(typeof Chart==='undefined')return;/* chart library failed to load: keep the translations */var ctx=$('radarChart');if(radarChart)radarChart.destroy();radarChart=new Chart(ctx,{type:'radar',data:{labels:['Formal','Neutral','Casual'],datasets:[{label:'Formal',data:[Math.round((results.formal.style_scores.formal||0)*100),Math.round((results.formal.style_scores.neutral||0)*100),Math.round((results.formal.style_scores.casual||0)*100)],backgroundColor:'rgba(34,211,238,0.1)',borderColor:'#22d3ee',borderWidth:2,pointBackgroundColor:'#22d3ee',pointRadius:3},{label:'Neutral',data:[Math.round((results.neutral.style_scores.formal||0)*100),Math.round((results.neutral.style_scores.neutral||0)*100),Math.round((results.neutral.style_scores.casual||0)*100)],backgroundColor:'rgba(100,116,139,0.1)',borderColor:'#64748b',borderWidth:2,pointBackgroundColor:'#64748b',pointRadius:3},{label:'Casual',data:[Math.round((results.casual.style_scores.formal||0)*100),Math.round((results.casual.style_scores.neutral||0)*100),Math.round((results.casual.style_scores.casual||0)*100)],backgroundColor:'rgba(251,146,60,0.1)',borderColor:'#fb923c',borderWidth:2,pointBackgroundColor:'#fb923c',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:25,color:'#3a4a40',backdropColor:'transparent',font:{size:9}},grid:{color:'#1a2420'},angleLines:{color:'#1a2420'},pointLabels:{color:'#8fa89a',font:{size:12,family:'Outfit'}}}},plugins:{legend:{labels:{color:'#8fa89a',font:{size:11,family:'Outfit'},usePointStyle:true,pointStyle:'circle',padding:14}}}}});}
 
 var activeTooltipWord=null;
