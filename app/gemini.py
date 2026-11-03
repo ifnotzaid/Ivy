@@ -14,13 +14,16 @@ import time
 
 DEFAULT_MODEL = "gemini-2.5-flash"
 
-# After Google says "quota used up", don't keep asking: every extra call
-# just fails slowly. Try again after this many seconds.
-RATE_LIMIT_PAUSE_SECONDS = 10 * 60
+# After Google says "quota used up", don't keep asking: every extra call just
+# fails slowly. Wait as long as Google's reply says (retryDelay), within these bounds.
+# A per-minute limit asks for seconds; the daily one asks for hours.
+MIN_PAUSE_SECONDS = 15
+MAX_PAUSE_SECONDS = 10 * 60
+DEFAULT_PAUSE_SECONDS = 60
 
 _client = None
 _connect_called = False
-_rate_limited_at = 0.0
+_paused_until = 0.0
 
 
 class RateLimited(RuntimeError):
@@ -33,7 +36,14 @@ def model() -> str:
 
 
 def recently_rate_limited() -> bool:
-    return time.time() - _rate_limited_at < RATE_LIMIT_PAUSE_SECONDS
+    return time.time() < _paused_until
+
+
+def _pause_seconds(exc: Exception) -> int:
+    """How long Google asked us to wait, from the 429's retryDelay ("37s")."""
+    match = re.search(r"retryDelay['\"]?\s*:\s*['\"](\d+(?:\.\d+)?)s", str(exc))
+    seconds = float(match.group(1)) if match else DEFAULT_PAUSE_SECONDS
+    return int(min(MAX_PAUSE_SECONDS, max(MIN_PAUSE_SECONDS, seconds)))
 
 
 def connect(api_key: str) -> bool:
@@ -84,7 +94,7 @@ def is_ready() -> bool:
 
 def generate(prompt: str, *, temperature: float, max_tokens: int) -> str:
     """Send one prompt and return the reply text (stripped). Raises if Gemini fails."""
-    global _rate_limited_at
+    global _paused_until
     client = get_client()
     if client is None:
         raise RuntimeError("Gemini is not configured")
@@ -106,8 +116,9 @@ def generate(prompt: str, *, temperature: float, max_tokens: int) -> str:
         )
     except Exception as exc:
         if is_rate_limited(exc):
-            _rate_limited_at = time.time()
-            print(f"  [Gemini] quota used up for {model()}; pausing AI calls for {RATE_LIMIT_PAUSE_SECONDS // 60} minutes")
+            pause = _pause_seconds(exc)
+            _paused_until = time.time() + pause
+            print(f"  [Gemini] quota used up for {model()}; pausing AI calls for {pause} seconds")
             raise RateLimited(str(exc)[:200]) from exc
         raise
     return (response.text or "").strip()

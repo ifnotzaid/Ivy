@@ -19,7 +19,7 @@ terminal and works on Windows (cmd).
   go to Gemini. Formal/casual go to Gemini with the register rules. Word analysis, stories and
   practice also use Gemini.
 - Gemini quota: the free tier gives `gemini-2.5-flash` only 20 requests a day, and one
-  translation uses 2-3. After a 429, `gemini.py` pauses AI calls for 10 minutes, translations
+  translation uses 2-3. After a 429, `gemini.py` pauses AI calls for as long as Google asks (15 s to 10 min), translations
   fall back to opus-mt, and the page shows a quiet notice. `GEMINI_MODEL` in `.env` picks
   another model; `gemini-3.5-flash-lite` worked on Nov 3, 2026 with a separate quota. Newer
   models reject `thinking_budget=0`, so it is only sent to 2.5 models.
