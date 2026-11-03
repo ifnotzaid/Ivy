@@ -41,19 +41,18 @@ http://localhost:5000. The startup summary says whether Gemini and the classifie
   `scripts/inspect_checkpoints.py` and two design skills in `.claude/skills/`. Zaid ran the
   app locally and it works. Merge after a final check of translations, stories and the
   classifier.
-- **Classifier recovery (in progress).** The trained classifier was found as
-  `C:\Users\zaid\Ivy\style-classifier-final.zip` (BertForSequenceClassification, 178M params,
-  labels 0 formal / 1 casual / 2 neutral, ~679 MB model.safetensors, tokenizer.json,
-  tokenizer_config.json, training_args.bin). Zaid unzipped it but the files did not land in
-  `models\style-classifier-final\`. Next steps:
-  1. Find where it was extracted (`dir /s /b config.json`, ignore `.venv`) and move the folder
-     that directly contains `config.json` to `models\style-classifier-final`.
-  2. Restart the app and confirm "Classifier: loaded". Test a formal and a casual sentence; the
-     tone bars should differ clearly.
-  3. The saved weights use old LayerNorm names (`LayerNorm.gamma` / `LayerNorm.beta`). If
-     loading prints missing/unexpected LayerNorm keys, or the tone bars look wrong, rename
-     those keys to `.weight` / `.bias` in a copy of `model.safetensors` and reload.
-  4. Remind Zaid to upload `style-classifier-final.zip` to Google Drive; it is the only copy.
+- **Classifier installed (done Nov 3, 2026).** `models\style-classifier-final\` holds the
+  trained classifier (BertForSequenceClassification, 178M params, labels 0 formal / 1 casual /
+  2 neutral, ~679 MB model.safetensors, tokenizer.json, tokenizer_config.json,
+  training_args.bin), extracted from `C:\Users\zaid\Ivy\style-classifier-final.zip`. The app
+  prints "Classifier: loaded" with no LayerNorm key warnings (the old `gamma`/`beta` names load
+  fine, so no renaming is needed). `/api/detect-style` scored a formal, a casual and a neutral
+  test sentence each above 99% for the right tone.
+  - Copies: the zip in the repo folder, plus an identical older copy at
+    `C:\Users\zaid\Desktop\studying stuff\8\project backup\models\style-classifier-final\`.
+    Both are on the same machine, so remind Zaid to upload the zip to Google Drive.
+  - `models\config.json` (loose, not in a subfolder) is a stray mT5 translator config. The
+    app does not use it; safe to delete once Zaid agrees.
 - **Classifier training notebook**: Zaid's Colab notebook (mBERT, 3 epochs, lr 2e-5,
   batch 32, max_length 128, 85/15 split with random_state 42, 88.8% validation accuracy) was
   shared in chat but is not in the repo yet. The training data is in the repo:
