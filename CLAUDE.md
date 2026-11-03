@@ -8,10 +8,21 @@ terminal and works on Windows (cmd).
 
 ## How it runs
 
-- Backend: `app/app.py` (Flask), `app/auth_routes.py` (login, vocab, sets, friends, stories,
-  practice), `app/database.py` (SQLite at `data/translator.db`), `app/word_analysis.py`.
-- Translation: Helsinki-NLP opus-mt models (downloaded on first run), then Gemini 2.5 Flash
-  restyles to the chosen register. Word analysis, stories and practice also use Gemini.
+- Backend: `app/app.py` (Flask app, translate/story routes, startup), `app/gemini.py` (the one
+  shared Gemini client, `generate()`, JSON parsing, quota handling), `app/translation.py`
+  (opus-mt, register prompts, tone classifier), `app/stories.py`, `app/tts.py`,
+  `app/word_analysis.py`, `app/auth_routes.py` (login, vocab, sets, friends, saved stories,
+  practice), `app/database.py` (SQLite at `data/translator.db`). `eval/run_all.py` imports
+  names from `app/app.py`; keep them exported.
+- Translation: Helsinki-NLP opus-mt models (downloaded on first run). Neutral uses opus-mt,
+  except inputs of 1-3 words or ones opus-mt copies through unchanged ("cool" -> "cool"), which
+  go to Gemini. Formal/casual go to Gemini with the register rules. Word analysis, stories and
+  practice also use Gemini.
+- Gemini quota: the free tier gives `gemini-2.5-flash` only 20 requests a day, and one
+  translation uses 2-3. After a 429, `gemini.py` pauses AI calls for 10 minutes, translations
+  fall back to opus-mt, and the page shows a quiet notice. `GEMINI_MODEL` in `.env` picks
+  another model; `gemini-3.5-flash-lite` worked on Nov 3, 2026 with a separate quota. Newer
+  models reject `thinking_budget=0`, so it is only sent to 2.5 models.
 - Tone bars: a fine-tuned multilingual BERT classifier loaded from
   `models/style-classifier-final/`. Without it, every tone reads about 33/33/34%.
 - Story audio: Google Cloud Text-to-Speech (needs `GOOGLE_APPLICATION_CREDENTIALS`), optional.
@@ -63,11 +74,11 @@ http://localhost:5000. The startup summary says whether Gemini and the classifie
   uses. Duplicates and training state only; safe to delete once Zaid agrees. Originals are on
   his Google Drive (`MyDrive/mt5-style-translator-v2`).
 - **Gemini billing**: AI Studio project `style-translator` is on the free tier. "Prepay
-  required" only applies to upgrading (min $5 prepaid credit). Stay free unless requests start
-  failing with 429 rate-limit errors.
+  required" only applies to upgrading (min $5 prepaid credit). On Nov 3, 2026 the daily
+  quota for `gemini-2.5-flash` (20 requests) ran out; Zaid still has to choose between paying
+  and switching `GEMINI_MODEL` to a lite model.
 
 ## Ideas not started
 
-- Show a friendly "daily limit reached, try again later" message when Gemini returns 429.
 - Add the classifier training notebook to `notebooks/`.
 - Set up Google Cloud TTS credentials so story audio works.
