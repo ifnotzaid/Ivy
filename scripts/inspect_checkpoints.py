@@ -1,7 +1,8 @@
 """Describe model checkpoints and zip downloads in a folder, without loading them.
 
-Usage (from the Ivy folder, with the virtual environment active):
-    python -I scripts/inspect_checkpoints.py "check this"
+Usage (from the Ivy folder; only the Python standard library is needed):
+    python -I -X utf8 scripts/inspect_checkpoints.py "check this"
+    python -I -X utf8 scripts/inspect_checkpoints.py a.zip b.zip
 
 For each file it prints what it is:
   - .safetensors: tensor count, data type, parameter count, a guess at the model
@@ -62,8 +63,12 @@ def guess_model(names):
 
 def inspect_safetensors(path):
     with path.open("rb") as f:
-        header_len = struct.unpack("<Q", f.read(8))[0]
-        header = json.loads(f.read(header_len))
+        describe_safetensors_header(f)
+
+
+def describe_safetensors_header(f):
+    header_len = struct.unpack("<Q", f.read(8))[0]
+    header = json.loads(f.read(header_len))
     meta = header.pop("__metadata__", {})
     dtypes = defaultdict(int)
     params = 0
@@ -91,6 +96,11 @@ def inspect_zip(path):
         for info in zf.infolist():
             print(f"  - {info.filename}  ({human(info.file_size)})")
         for info in zf.infolist():
+            if info.filename.endswith(".safetensors"):
+                print(f"\n  >>> {info.filename} (header only)")
+                with zf.open(info) as f:
+                    describe_safetensors_header(f)
+        for info in zf.infolist():
             if info.is_dir() or info.file_size > MAX_TEXT_BYTES:
                 continue
             if Path(info.filename).suffix.lower() not in TEXT_SUFFIXES:
@@ -103,15 +113,22 @@ def inspect_zip(path):
 
 
 def main():
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
-    folder = Path(sys.argv[1])
-    files = sorted(p for p in folder.rglob("*") if p.is_file())
+    files = []
+    for arg in sys.argv[1:]:
+        target = Path(arg)
+        if target.is_dir():
+            files += sorted(p for p in target.rglob("*") if p.is_file())
+        elif target.is_file():
+            files.append(target)
+        else:
+            print(f"\n=== {arg}\n  not found")
     groups = defaultdict(list)
     for path in files:
         size = path.stat().st_size
-        print(f"\n=== {path.relative_to(folder)}  ({human(size)})")
+        print(f"\n=== {path}  ({human(size)})")
         suffix = path.suffix.lower()
         try:
             if suffix == ".safetensors":
