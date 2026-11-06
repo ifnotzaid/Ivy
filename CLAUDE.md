@@ -52,6 +52,11 @@ http://localhost:5000. The startup summary says whether Gemini and the classifie
   `scripts/inspect_checkpoints.py` and two design skills in `.claude/skills/`. Zaid ran the
   app locally and it works. Merge after a final check of translations, stories and the
   classifier.
+- **README refreshed (Nov 6, 2026)** for people looking at the repo (Zaid is sending it to a
+  possible employer). Screenshots in `docs/screenshots/` were retaken from the current app
+  with a headless-Chrome script; the old mT5/Streamlit `architecture.png` was removed and
+  replaced by a Mermaid diagram in the README. The GitHub About text and topics are set in the
+  repo settings, not in files.
 - **Classifier installed (done Nov 3, 2026).** `models\style-classifier-final\` holds the
   trained classifier (BertForSequenceClassification, 178M params, labels 0 formal / 1 casual /
   2 neutral, ~679 MB model.safetensors, tokenizer.json, tokenizer_config.json,

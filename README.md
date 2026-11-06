@@ -1,201 +1,235 @@
 <div align="center">
 
-# Ivy
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="app/static/logo-dark.png" />
+  <img src="app/static/logo-light.png" alt="Ivy" height="72" />
+</picture>
 
-**A style-aware multilingual translator for language learners.**
+**A style-aware translator for language learners.**
 
-Translate between English, Turkish, German, and Russian in three registers — formal, neutral, or casual — with built-in vocabulary saving, spaced-repetition flashcards, and AI-generated graded reading material with synchronised audio.
+Translate between English, Turkish, German and Russian in a formal, neutral or casual register,
+see what every word means, and turn the words you meet into flashcards, stories and practice.
+
+Python · Flask · PyTorch / Hugging Face Transformers · Google Gemini · SQLite · vanilla JS
 
 </div>
 
 <p align="center">
-  <img src="docs/screenshots/compare.png" alt="Compare mode showing three register outputs" width="100%" />
+  <img src="docs/screenshots/translate.png" alt="Ivy translating a casual English sentence into casual Turkish, with word details open and tone bars below" width="100%" />
 </p>
 
----
+## Why Ivy
 
-## What is Ivy?
+Most translators give one answer, and that answer is usually polite and a little stiff. But
+asking a stranger for the time in Turkish sounds nothing like asking a close friend. Learners
+need to see that difference, and normal translators hide it.
 
-Most translators give you one answer. Type a sentence in, get a sentence out — and the answer is grammatically correct but socially flat. The way you'd ask a stranger for the time in Turkish is not the way you'd ask a close friend, and the same is true in Russian, German, and most living languages. Mainstream translators treat that choice as already made for you. Ivy doesn't.
+Ivy takes the register as an input. You choose formal, neutral or casual and get a translation
+written that way. A fine-tuned multilingual BERT classifier then scores the tone of the input and
+the output, so you can check that the result sounds the way you asked. Everything else is built
+for learning: tap any translated word for its meaning and grammar, save it, review it with
+spaced repetition, read short stories at your CEFR level, and practise with gap-fill quizzes.
 
-Ivy is a small but complete language-learning environment built around a translator that *takes register as an input*. You pick formal, neutral, or casual; the system delivers a translation appropriate to that register, and a multilingual style classifier verifies what it actually produced. Around the translator sits the rest of what a learner actually needs: every word in every translation is analysed for part of speech, base form, and grammatical metadata; vocabulary saves with one click; flashcards schedule themselves via SuperMemo SM-2; short stories generate on demand at chosen CEFR levels with synchronised text-to-speech playback; and flashcard sets can be shared with other users through a snapshot-fork community layer.
-
-This was built as a capstone project at İstinye University. The full technical report — including evaluation methodology, results, and an honest discussion of limitations — is in [`docs/report.pdf`](docs/report.pdf).
+Ivy is my capstone project at İstinye University (Software Engineering). The full technical
+report, with the evaluation method, results and limitations, is in [`docs/report.pdf`](docs/report.pdf).
 
 ## Features
 
-### Style-aware translation across four languages
+### One sentence, three registers
 
 <p align="center">
-  <img src="docs/screenshots/compare.png" alt="Three-style comparison" width="90%" />
+  <img src="docs/screenshots/compare.png" alt="Compare mode: the same English request translated into formal, neutral and casual Turkish" width="100%" />
 </p>
 
-Pick a source language, a target language, and a register. The pipeline combines Helsinki-NLP's [opus-mt-tc-big](https://huggingface.co/Helsinki-NLP) models for the base translation with [Google Gemini 2.5 Flash](https://ai.google.dev) for register restyling. For non-English pairs (e.g., Russian → Turkish) it chains through English when no direct model exists. Specifically for casual Turkish, a two-layer correction mechanism handles the persistent failure mode of LLMs retaining the formal copular suffix `-dır` in informal contexts.
+Compare mode translates one input into all three registers side by side, so the differences
+(siz vs. sen, *-ebilir misiniz* vs. *-sene bi*) are easy to see.
 
-Compare mode renders all three registers side-by-side from a single input — useful for learners who want to see *why* each register sounds the way it does.
+### Word-by-word details
 
-### Word-level analysis with inline tooltips
+Every word in a translation is analysed for part of speech, base form, meaning, grammatical case
+and gender where they apply, and an estimated CEFR level. Underlines are coloured by part of
+speech (noun blue, verb green, adjective amber, adverb pink). Details open on hover, tap or
+keyboard focus, and one click saves the word to your vocabulary.
+
+### Spaced-repetition flashcards
 
 <p align="center">
-  <img src="docs/screenshots/word_tooltip.png" alt="Word analysis tooltip showing POS, base form, CEFR level, and translation" width="90%" />
+  <img src="docs/screenshots/flashcards.png" alt="A Turkish flashcard showing the word, its base form, tags, meaning and the sentence it came from" width="80%" />
 </p>
 
-Every translated word is automatically analysed: part of speech, base form, grammatical case and gender where applicable, and an estimated CEFR difficulty. Hover any word to see the analysis; one click saves it to your vocabulary. Color-coded underlines (noun blue, verb green, adjective yellow, adverb pink) make the grammatical structure visible at a glance. The bottom panels show the input-tone and output-tone analysis from the style classifier.
+Saved words become flashcards, scheduled with the SuperMemo SM-2 algorithm (the one Anki is
+based on). Each card keeps the sentence the word came from. Cards can be grouped into sets, and
+sets can be made public.
 
-### Spaced-repetition flashcards (SM-2)
+### Stories at your level
 
 <p align="center">
-  <img src="docs/screenshots/flashcards.png" alt="Flashcard review with rating buttons" width="80%" />
+  <img src="docs/screenshots/story.png" alt="A generated A2 Turkish story with underlined words and a focus vocabulary list" width="100%" />
 </p>
 
-Saved vocabulary becomes flashcards automatically. The scheduler implements the SuperMemo SM-2 algorithm — the same one Anki uses — so cards you struggle with come back sooner and cards you find easy slide further into the future. Cards show the target-language word, the example sentence it came from, the CEFR level, and the English translation. Sets are personal by default; you can mark any set public for the community.
+Generate a short story in your target language at a chosen CEFR level and theme, with a summary
+in your own language, comprehension questions and a focus vocabulary list. Every word in the
+story has the same details as translations. With Google Cloud Text-to-Speech set up, stories are
+read aloud and the current word is highlighted as it is spoken.
 
-### AI-generated stories with karaoke audio
+### Practice and community
+
+- **Practice:** gap-fill quizzes built from your saved words or stories.
+- **Community:** add friends, browse public flashcard sets and adopt one. Adopting makes your
+  own copy with fresh SM-2 progress, so your study history and the author's stay separate.
+- **Ivy explains:** ask why a translation was worded the way it was.
+- **Light and dark themes**, a phone layout, keyboard support and reduced-motion support.
 
 <p align="center">
-  <img src="docs/screenshots/karaoke.png" alt="Karaoke story playback with synchronised highlighting" width="90%" />
+  <img src="docs/screenshots/light.png" alt="The translator in the light theme, translating into formal German" width="100%" />
 </p>
 
-Generate a short story in your target language at a CEFR level you choose, on a topic you choose. The story is read aloud by Google Cloud's Chirp 3 HD voices with word-level synchronisation, so the currently-spoken word is highlighted as it plays. Click any word to look it up or save it without losing your place. The right panel surfaces a focus-vocabulary list pulled from the story.
+## How it works
 
-### Community: friends and snapshot-fork sets
+```mermaid
+flowchart LR
+    UI["Browser<br/>index.html · sets.html"] -->|JSON API| APP["Flask app<br/>app.py"]
+    APP --> TR["translation.py"]
+    TR -->|neutral| OPUS["opus-mt<br/>(Helsinki-NLP)"]
+    TR -->|"formal · casual<br/>very short or slang input"| GEM["Google Gemini"]
+    APP --> CLS["Tone classifier<br/>fine-tuned mBERT"]
+    APP --> WA["word_analysis.py"] --> GEM
+    APP --> ST["stories.py"] --> GEM
+    ST -.->|optional| TTS["Google Cloud TTS"]
+    APP --> DB[("SQLite")]
+```
 
-Add friends by email. Browse and adopt public flashcard sets — adoption creates a deep copy of the set with fresh SM-2 progress, so your study state and the original author's stay completely independent.
+- **Neutral** translations come from Helsinki-NLP opus-mt models running locally. Pairs without
+  a direct model (for example Turkish → German) go through English. Very short inputs, slang
+  and profanity, and inputs that opus-mt copies through unchanged ("cool" → "cool") go to Gemini
+  instead.
+- **Formal and casual** translations are written by Gemini with per-language register rules
+  (for example *siz* vs. *sen* in Turkish, *Sie* vs. *du* in German, *вы* vs. *ты* in Russian).
+  An extra pass removes the written-style Turkish *-dır* endings that LLMs tend to leave in casual
+  text. Formal stays clean; neutral and casual translate swearing faithfully instead of
+  softening or abbreviating it.
+- **Tone bars** come from a multilingual BERT model I fine-tuned to label text as formal,
+  neutral or casual (13,800 labelled sentences in four languages, 88.8% validation accuracy).
+- **Fallbacks:** if Gemini is unavailable or its quota is used up, Ivy pauses AI calls for as
+  long as Google asks, falls back to opus-mt and shows a quiet notice instead of failing.
+- **Security:** everything from a user or an AI response is HTML-escaped before it is shown,
+  because public sets are seen by other users. Passwords are hashed with bcrypt.
 
-## Languages and registers supported
+The backend is split by feature: `gemini.py` (the shared client, quota handling), `translation.py`,
+`word_analysis.py`, `stories.py`, `tts.py`, `auth_routes.py` and `database.py`. The frontend is
+plain HTML, CSS and JavaScript; its design rules are in [`DESIGN.md`](DESIGN.md).
 
-|              | English | Turkish | German | Russian |
-|--------------|:-------:|:-------:|:------:|:-------:|
-| **Formal**   |   ✅    |   ✅    |   ✅   |   ✅    |
-| **Neutral**  |   ✅    |   ✅    |   ✅   |   ✅    |
-| **Casual**   |   ✅    |   ✅    |   ✅   |   ✅    |
+## Languages
 
-All twelve cross-language directions are supported (e.g., en ↔ tr, tr ↔ de). Pairs without a direct opus-mt model chain through English transparently.
+All twelve directions between English, Turkish, German and Russian, each in formal, neutral and
+casual. Same-language input (for example English → English) rewrites the text in the chosen
+register.
 
-## Tech stack
+## Running it locally
 
-**Backend:** Python 3.10+, Flask, SQLite, Flask-Login, bcrypt
-**ML / NLP:** Hugging Face Transformers, Helsinki-NLP opus-mt-tc-big, mBERT (multilingual BERT) for the style classifier
-**LLM:** Google Gemini 2.5 Flash for register restyling, word analysis, and story generation
-**TTS:** Google Cloud Text-to-Speech (Chirp 3 HD)
-**Frontend:** Vanilla JavaScript SPA, Jinja2 templates, Chart.js for the radar visualisation
-
-## Installation
-
-### Prerequisites
-
-- Python 3.10 or newer
-- ~5 GB of disk space (for the opus-mt model weights, downloaded on first run)
-- A Google AI Studio account with Gemini API access ([free tier works for most usage](https://ai.google.dev/pricing))
-- A Google Cloud project with the Text-to-Speech API enabled ([free monthly quota covers typical usage](https://cloud.google.com/text-to-speech/pricing))
-
-### Setup
+**You need:** Python 3.10+, about 5 GB of disk space for the translation models, and a free
+[Gemini API key](https://aistudio.google.com/apikey).
 
 ```bash
-# Clone
-git clone https://github.com/ifnotzaid/style-translator.git
-cd style-translator
-
-# Create a virtual environment (recommended)
+git clone https://github.com/ifnotzaid/Ivy.git
+cd Ivy
 python -m venv .venv
-source .venv/bin/activate   # on Windows: .venv\Scripts\activate
-
-# Install dependencies
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env             # Windows: copy .env.example .env
 ```
 
-The first time you run the app, it will download the opus-mt model checkpoints (~3 GB total across the six language pairs). This is a one-time cost; subsequent starts are fast.
-
-### Configuration
-
-Create a `.env` file in the project root (a `.env.example` is provided):
-
-```bash
-# Gemini API key from https://aistudio.google.com/apikey
-GEMINI_API_KEY=your_gemini_key_here
-
-# Path to your Google Cloud service-account JSON for Text-to-Speech
-GOOGLE_APPLICATION_CREDENTIALS=./google-cloud-credentials.json
-
-# Flask session secret (generate with: python -c "import secrets; print(secrets.token_hex(32))")
-FLASK_SECRET_KEY=your_random_secret_here
-```
-
-The `.env` file is gitignored. Never commit your keys.
-
-## Running
+Open `.env` and set `GEMINI_API_KEY` and `FLASK_SECRET_KEY`
+(`python -c "import secrets; print(secrets.token_hex(32))"` makes a good one). Then:
 
 ```bash
 python app/app.py
 ```
 
-By default, Ivy listens on `http://localhost:5000`. Open that in your browser, create an account, and start translating.
+Open http://localhost:5000 and create an account. The first start downloads the opus-mt models
+(about 3 GB) and takes a few minutes; later starts take 30–60 seconds. The startup summary says
+whether Gemini and the classifier loaded.
 
-On first startup, expect a 30-60 second wait while the opus-mt and BERT models load into memory. Subsequent translation requests are fast (typically 1-3 seconds, mostly Gemini API latency).
+**Optional settings**
+
+- `GEMINI_MODEL`: which Gemini model to use (default `gemini-2.5-flash`). The free tier allows
+  only 20 requests a day for that model; a lite model such as `gemini-3.5-flash-lite` has its
+  own quota.
+- **Tone classifier:** the trained weights (about 680 MB) are too large for git. Put them in
+  `models/style-classifier-final/`. Without them Ivy still runs, and the tone bars show an even
+  split. The training data is in `data/processed/classifier/` (multilingual BERT, 3 epochs,
+  learning rate 2e-5, batch size 32; about 6 minutes on a Colab GPU).
+- **Story audio:** set `GOOGLE_APPLICATION_CREDENTIALS` to a Google Cloud service-account key
+  with the Text-to-Speech API enabled.
 
 ## Evaluation
 
-A quantitative evaluation of all three system components is documented in the [final report](docs/report.pdf). Briefly:
+The evaluation is described in full in the [report](docs/report.pdf). In short:
 
-| Component         | Metric           | Result                                          |
-|-------------------|------------------|-------------------------------------------------|
-| Translation       | BLEU / chrF++    | 44.85–62.78 / 62.53–72.92 across six directions |
-| Style classifier  | Macro-F1         | 0.77 across 432 sentences in four languages     |
-| Word analysis     | POS accuracy     | 98% on 100 Turkish entries                      |
+| Component        | Metric        | Result                                          |
+|------------------|---------------|-------------------------------------------------|
+| Translation      | BLEU / chrF++ | 44.85–62.78 / 62.53–72.92 across six directions |
+| Style classifier | Macro-F1      | 0.77 on 432 sentences in four languages         |
+| Word analysis    | POS accuracy  | 98% on 100 Turkish entries                      |
 
-The most interesting single result is the structure of the style classifier's confusion matrix: out of 288 truly extreme-register inputs (144 formal + 144 casual), the classifier never crosses the polarity line. Errors concentrate as drift toward the neutral class. The classifier knows where the poles are; it's just conservative about committing to non-neutral labels.
+The most interesting result is the shape of the classifier's mistakes: out of 288 clearly formal
+or clearly casual test sentences, it never labelled a formal one casual or a casual one formal.
+Its errors are all drift toward neutral.
 
-The evaluation harness is in `eval/` and can be rerun with:
+The evaluation harness is in `eval/` and can be rerun with `python -m eval.run_all`; the latest
+results are in [`reports/evaluation_report.md`](reports/evaluation_report.md).
 
-```bash
-python -m eval.run_all
-```
+## Limitations
+
+- **The translation test runs in neutral mode**, so it measures the opus-mt backbone, not the
+  register rewriting. A test set with separate formal and casual references is the most useful
+  next step.
+- **The classifier test data is LLM-generated.** The prompts differ from the training prompts,
+  but human-written test sentences would be a fairer test.
+- **Word-analysis labels were generated by GPT-4**, so the score measures agreement between two
+  models. Most of the 13 "errors" are lemma conventions (stem vs. infinitive), not real mistakes.
+- **Going through English loses information** for pairs like Russian → Turkish.
+- **Some sentences have no casual form.** Proverb-like English ("Money is the anthem of
+  success") comes out the same in every register in Turkish, which is correct but can look like
+  a failure.
 
 ## Project structure
 
 ```
-style-translator/
-├── app/                     # Flask app entry point and routes
-│   ├── app.py               # Main application, translation/style endpoints
-│   ├── auth_routes.py       # Authentication, vocabulary, flashcards, social
-│   └── database.py          # SQLite data-access layer
-├── templates/               # Jinja2 templates
-│   ├── index.html           # Main SPA (translation, stories, flashcards)
-│   └── sets.html            # Community flashcard sets page
-├── eval/                    # Evaluation harness
-│   ├── run_all.py           # Top-level evaluation driver
-│   ├── data/                # Evaluation datasets (translation, style, word)
-│   ├── runners/             # Per-task evaluation logic
-│   └── build_*.py           # Scripts that build the eval data
-├── data/
-│   └── translator.db        # SQLite database (created on first run)
-├── docs/
-│   ├── report.pdf           # Capstone final report
-│   └── screenshots/         # README screenshots
-├── reports/
-│   ├── evaluation_report.md
-│   └── evaluation_report.json
-├── requirements.txt
-├── .env.example
-└── README.md
+Ivy/
+├── app/
+│   ├── app.py              # Flask app, translate / compare / story routes, startup
+│   ├── gemini.py           # shared Gemini client, JSON parsing, quota handling
+│   ├── translation.py      # opus-mt, register rules, tone classifier
+│   ├── word_analysis.py    # per-word grammar and meaning
+│   ├── stories.py          # CEFR story generation
+│   ├── tts.py              # Google Cloud Text-to-Speech and word timing
+│   ├── auth_routes.py      # accounts, vocabulary, flashcards, sets, friends, practice
+│   ├── database.py         # SQLite data layer, SM-2 scheduling
+│   ├── templates/          # index.html (the app), sets.html (community)
+│   └── static/             # css/, js/, logos
+├── data/processed/classifier/   # tone classifier training data
+├── eval/                   # evaluation harness and test sets
+├── reports/                # evaluation results
+├── scripts/                # data download, generation and preprocessing
+├── docs/                   # report.pdf, screenshots, frontend review
+├── DESIGN.md               # design system
+└── requirements.txt
 ```
 
-## Limitations
+## Acknowledgements
 
-Built into the project from the start and discussed honestly in the [final report](docs/report.pdf):
+Built as the COE402 Capstone Project at İstinye University, Department of Software Engineering,
+supervised by Asst. Prof. Ragıp Mustafa Başbuğ.
 
-- **Translation evaluation does not directly test style targeting.** The Tatoeba-derived test set runs the pipeline in neutral mode, which collapses to the opus-mt backbone with no Gemini restyling. A proper style-aware test set with per-register references is the most important single piece of future work.
-- **Style classifier evaluation uses LLM-generated test data.** The eval prompts differ from training prompts, but the underlying model family is the same. Fully independent evaluation would use human-authored test data.
-- **Word-analysis evaluation is AI-on-AI.** Test labels are GPT-4-generated, so the reported numbers measure inter-model agreement rather than ground truth. About 11 of 13 "errors" are conventional disagreements (bare-stem lemma vs. infinitive lemma), not real errors.
-- **English chaining is lossy.** Non-English-anchored pairs (e.g., ru → tr) translate through English and accumulate two stages of error.
-- **The casual register doesn't apply to all content.** Aphoristic English inputs ("Money is the anthem of success") produce register-neutral Turkish output, because Turkish speakers don't aphorise casually. This is linguistically correct behaviour but can look like a failure.
-
-## Acknowledgments
-
-This project was built as the COE402 Capstone Project at İstinye University, Department of Software Engineering, under the supervision of Asst. Prof. Ragıp Mustafa Başbuğ.
-
-Built on top of work by [Helsinki-NLP / OPUS](https://github.com/Helsinki-NLP/Opus-MT) (Tiedemann and collaborators), [Hugging Face Transformers](https://github.com/huggingface/transformers), [Google Gemini](https://ai.google.dev), [Google Cloud Text-to-Speech](https://cloud.google.com/text-to-speech), and the contributors to the [Tatoeba](https://tatoeba.org) and OPUS-100 parallel corpora. The SM-2 spaced-repetition algorithm is from Woźniak & Gorzelanczyk (1994).
+Ivy builds on [Helsinki-NLP / OPUS-MT](https://github.com/Helsinki-NLP/Opus-MT),
+[Hugging Face Transformers](https://github.com/huggingface/transformers),
+[Google Gemini](https://ai.google.dev),
+[Google Cloud Text-to-Speech](https://cloud.google.com/text-to-speech), and the
+[Tatoeba](https://tatoeba.org) and OPUS-100 corpora. SM-2 is from Woźniak & Gorzelańczyk (1994).
 
 ## License
 
-This project is released for academic and personal use. For commercial use, please open an issue.
+Released for academic and personal use. For commercial use, please open an issue.
+
+Made by Zaid ([ifnotzaid](https://github.com/ifnotzaid)).

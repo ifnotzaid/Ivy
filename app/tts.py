@@ -130,6 +130,16 @@ def _split_text_for_tts(text: str) -> list[str]:
     return chunks
 
 
+def _check_credentials() -> None:
+    """Fail with a clear message when the Google Cloud key file is missing."""
+    path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "").strip().strip('"')
+    if path and not os.path.isfile(path):
+        raise RuntimeError(
+            "Story audio isn't set up yet: add a Google Cloud service-account key "
+            "(GOOGLE_APPLICATION_CREDENTIALS in .env) to hear stories read aloud."
+        )
+
+
 def synthesize_story_audio(provider: str, text: str, language: str) -> tuple[bytes, str]:
     text = (text or "").strip()
     if not text:
@@ -150,6 +160,7 @@ def synthesize_story_audio(provider: str, text: str, language: str) -> tuple[byt
     if not chunks:
         raise RuntimeError("No story text provided")
 
+    _check_credentials()
     try:
         client = texttospeech.TextToSpeechClient()
         voice = texttospeech.VoiceSelectionParams(
@@ -326,6 +337,7 @@ def synthesize_marked_story_audio(word_items: list, language: str, story_text: s
 
     language_code = GOOGLE_TTS_LANGUAGE_CODES.get(language, "en-US")
 
+    _check_credentials()
     try:
         client = texttospeech.TextToSpeechClient()
         # Chirp3 HD ignores unsupported SSML tags such as <mark>, so word sync
