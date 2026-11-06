@@ -6,72 +6,25 @@ Register this blueprint in app.py with:
     app.register_blueprint(auth_bp)
 """
 
-import json
-import os
-import re
-import sys
-
 from flask import Blueprint, request, jsonify, session
+
+import gemini
+from translation import LANGUAGES as LANGUAGE_NAMES
 from database import (
-       init_db, create_user, verify_user, get_user_by_id,
-       save_word, get_vocabulary, delete_word, get_vocab_stats,
-       get_due_flashcards, review_flashcard,
-       create_flashcard_set, get_user_sets, get_set_by_id,
-       get_set_words, add_word_to_set, remove_word_from_set,
-       delete_flashcard_set, update_set_visibility, fork_public_set,
-       send_friend_request, accept_friend_request, reject_friend_request, remove_friend,
-       get_friends, get_pending_requests, get_friend_public_sets,
-       get_public_sets_browse, save_story, get_saved_stories,
-       get_saved_story, delete_saved_story, set_story_audio, get_story_audio,
-       get_vocab_count_for_lang, build_cloze_items_for_user, find_vocab_id_by_word,
-   )
+    create_user, verify_user, get_user_by_id,
+    save_word, get_vocabulary, delete_word, get_vocab_stats,
+    get_due_flashcards, review_flashcard,
+    create_flashcard_set, get_user_sets, get_set_by_id,
+    get_set_words, add_word_to_set, remove_word_from_set,
+    delete_flashcard_set, update_set_visibility, fork_public_set,
+    send_friend_request, accept_friend_request, reject_friend_request, remove_friend,
+    get_friends, get_pending_requests, get_friend_public_sets,
+    get_public_sets_browse, save_story, get_saved_stories,
+    get_saved_story, delete_saved_story,
+    get_vocab_count_for_lang, build_cloze_items_for_user, find_vocab_id_by_word,
+)
 
 auth_bp = Blueprint("auth", __name__)
-
-LANGUAGE_NAMES = {
-    "tr": "Turkish",
-    "de": "German",
-    "ru": "Russian",
-    "en": "English",
-}
-
-
-def _extract_json_payload(raw_text: str):
-    """Extract a JSON object from a Gemini response."""
-    if not raw_text:
-        return None
-    cleaned = raw_text.strip()
-    if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        pass
-    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-    if not match:
-        return None
-    try:
-        return json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return None
-
-
-def _get_gemini_client_for_practice():
-    """Reuse the running app Gemini client when possible, else fall back to env key."""
-    for module_name in ("__main__", "app", "app.app"):
-        module = sys.modules.get(module_name)
-        client = getattr(module, "gemini_client", None) if module else None
-        if client is not None:
-            return client
-    gemini_key = os.environ.get("GEMINI_API_KEY", "")
-    if not gemini_key:
-        return None
-    try:
-        from google import genai
-        return genai.Client(api_key=gemini_key)
-    except Exception:
-        return None
 
 
 def _translate_cloze_batch(items: list[dict], target_lang: str, support_lang: str) -> list[dict]:
@@ -83,8 +36,7 @@ def _translate_cloze_batch(items: list[dict], target_lang: str, support_lang: st
     n = len(items or [])
     if not n or target_lang == support_lang:
         return [{"translation": "", "highlight": ""} for _ in range(n)]
-    client = _get_gemini_client_for_practice()
-    if client is None:
+    if not gemini.is_ready():
         return [{"translation": "", "highlight": ""} for _ in range(n)]
 
     target_name = LANGUAGE_NAMES.get(target_lang, target_lang)
@@ -110,17 +62,7 @@ Rules:
 
 No commentary, no markdown fences."""
     try:
-        from google.genai import types
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.2,
-                max_output_tokens=2200,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
-        )
-        payload = _extract_json_payload(response.text or "")
+        payload = gemini.extract_json_payload(gemini.generate(prompt, temperature=0.2, max_tokens=2200))
         rows = payload.get("items") if isinstance(payload, dict) else None
         if not isinstance(rows, list):
             return [{"translation": "", "highlight": ""} for _ in range(n)]
@@ -172,7 +114,7 @@ def get_current_user():
 # ──────────────────────────────────────────────
 @auth_bp.route("/api/auth/signup", methods=["POST"])
 def signup():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     email = data.get("email", "").strip()
     password = data.get("password", "")
     name = data.get("name", "")
@@ -194,7 +136,7 @@ def signup():
 
 @auth_bp.route("/api/auth/login", methods=["POST"])
 def login():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     email = data.get("email", "").strip()
     password = data.get("password", "")
 
@@ -232,7 +174,7 @@ def api_save_word():
     if not user:
         return jsonify({"error": "Login required"}), 401
 
-    data = request.json
+    data = request.get_json(silent=True) or {}
     vocab_id = save_word(user["id"], data)
     return jsonify({"vocab_id": vocab_id})
 
@@ -310,7 +252,7 @@ def api_review_flashcard():
     if not user:
         return jsonify({"error": "Login required"}), 401
 
-    data = request.json
+    data = request.get_json(silent=True) or {}
     vocab_id = data.get("vocab_id")
     quality = data.get("quality", 0)  # 0-5
 
@@ -329,7 +271,7 @@ def api_create_set():
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-    data = request.json
+    data = request.get_json(silent=True) or {}
     name = data.get("name", "").strip()
     if not name:
         return jsonify({"error": "Set name required"}), 400
@@ -369,7 +311,7 @@ def api_add_to_set(set_id):
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-    data = request.json
+    data = request.get_json(silent=True) or {}
     vocab_id = data.get("vocab_id")
     if not vocab_id:
         return jsonify({"error": "vocab_id required"}), 400
@@ -385,7 +327,7 @@ def api_remove_from_set(set_id):
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-    data = request.json
+    data = request.get_json(silent=True) or {}
     vocab_id = data.get("vocab_id")
     set_data = get_set_by_id(set_id)
     if not set_data or set_data["user_id"] != user["id"]:
@@ -408,7 +350,7 @@ def api_set_visibility(set_id):
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-    data = request.json
+    data = request.get_json(silent=True) or {}
     update_set_visibility(user["id"], set_id, data.get("is_public", False))
     return jsonify({"ok": True})
 
@@ -443,7 +385,7 @@ def api_friend_request():
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-    data = request.json
+    data = request.get_json(silent=True) or {}
     email = data.get("email", "")
     if not email:
         return jsonify({"error": "Email required"}), 400
@@ -513,7 +455,7 @@ def api_save_story():
     if not user:
         return jsonify({"error": "Login required"}), 401
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     story_text = data.get("story_text", "").strip()
     title = data.get("title", "").strip()
 
@@ -566,7 +508,7 @@ def api_practice_build():
     if not user:
         return jsonify({"error": "Login required"}), 401
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     target_lang = (data.get("target_lang") or "").strip()
     if target_lang not in ("tr", "de", "ru", "en"):
         return jsonify({"error": "Unsupported language"}), 400
@@ -604,7 +546,7 @@ def api_practice_answer():
     if not user:
         return jsonify({"error": "Login required"}), 401
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     word = (data.get("word") or "").strip()
     target_lang = (data.get("target_lang") or "").strip()
     correct = bool(data.get("correct"))
