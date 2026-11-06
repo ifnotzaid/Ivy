@@ -1,6 +1,6 @@
 # Frontend review (Nov 2026)
 
-Checked against Vercel's Web Interface Guidelines (`.claude/skills/web-design-guidelines`) and the
+Checked against Vercel's Web Interface Guidelines and the
 screenshots in `docs/screenshots/`. Paths are relative to the repo root.
 
 ## Status (polish pass, Nov 2026)
