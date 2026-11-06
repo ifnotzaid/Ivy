@@ -42,21 +42,21 @@ http://localhost:5000. The startup summary says whether Gemini and the classifie
 - Never commit `.env`, `models/`, `check this/`, model weights or zips. They are gitignored.
 - Work on a branch and open a pull request; don't commit to `main` directly.
 
-## Where things stand (Nov 3, 2026)
+## Where things stand (Nov 6, 2026)
 
-- **Branch `frontend-redesign`, pull request #1 open, not merged**
-  (https://github.com/ifnotzaid/Ivy/pull/1). It fixes a stored-XSS bug on the Community page,
-  polishes the UI (phone layout, tap/keyboard word details, contrast, accessibility, light
-  theme on `/sets`, Formal colour changed from violet to cyan), moves CSS/JS into
-  `app/static/`, and adds `DESIGN.md`, `docs/frontend-review.md`,
-  `scripts/inspect_checkpoints.py` and two design skills in `.claude/skills/`. Zaid ran the
-  app locally and it works. Merge after a final check of translations, stories and the
-  classifier.
-- **README refreshed (Nov 6, 2026)** for people looking at the repo (Zaid is sending it to a
-  possible employer). Screenshots in `docs/screenshots/` were retaken from the current app
-  with a headless-Chrome script; the old mT5/Streamlit `architecture.png` was removed and
-  replaced by a Mermaid diagram in the README. The GitHub About text and topics are set in the
-  repo settings, not in files.
+- **Pull request #1 merged into `main` (Nov 6, 2026)**
+  (https://github.com/ifnotzaid/Ivy/pull/1). It fixed a stored-XSS bug on the Community page,
+  polished the UI (phone layout, tap/keyboard word details, contrast, accessibility, light
+  theme on `/sets`, Formal colour changed from violet to cyan, micro-interactions in
+  `motion.css`/`motion.js`), moved CSS/JS into `app/static/`, split the backend into modules,
+  made neutral/casual translate profanity faithfully, and added `DESIGN.md`,
+  `docs/frontend-review.md`, `scripts/inspect_checkpoints.py` and two design skills in
+  `.claude/skills/`. The `frontend-redesign` branch can be deleted on GitHub.
+- **README and GitHub page polished (Nov 6, 2026)** because Zaid is sending the repo to a
+  possible employer. Screenshots in `docs/screenshots/` were retaken from the current app with a
+  headless-Chrome script; the old mT5/Streamlit `architecture.png` was replaced by a Mermaid
+  diagram in the README. The About description and 15 topics are set in the GitHub repo
+  settings, not in files. Keep the README and screenshots current when features change.
 - **Classifier installed (done Nov 3, 2026).** `models\style-classifier-final\` holds the
   trained classifier (BertForSequenceClassification, 178M params, labels 0 formal / 1 casual /
   2 neutral, ~679 MB model.safetensors, tokenizer.json, tokenizer_config.json,
@@ -78,10 +78,12 @@ http://localhost:5000. The startup summary says whether Gemini and the classifie
   `mt5-style-translator-final.zip` are an older mT5-base "style translator" Ivy no longer
   uses. Duplicates and training state only; safe to delete once Zaid agrees. Originals are on
   his Google Drive (`MyDrive/mt5-style-translator-v2`).
-- **Gemini billing**: AI Studio project `style-translator` is on the free tier. "Prepay
-  required" only applies to upgrading (min $5 prepaid credit). On Nov 3, 2026 the daily
-  quota for `gemini-2.5-flash` (20 requests) ran out; Zaid still has to choose between paying
-  and switching `GEMINI_MODEL` to a lite model.
+- **Gemini model**: AI Studio project `style-translator` is on the free tier ("Prepay
+  required" only applies to upgrading, min $5 prepaid credit). Zaid's `.env` now sets
+  `GEMINI_MODEL=gemini-3.5-flash-lite`, which has its own quota; bursts can still hit its
+  per-minute limit, which `gemini.py` handles by pausing.
+- **Story audio**: Zaid's `.env` still has the placeholder `GOOGLE_APPLICATION_CREDENTIALS`
+  path, so narration says "Story audio isn't set up yet" until a real key is added.
 
 ## Ideas not started
 
