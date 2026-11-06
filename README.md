@@ -212,7 +212,7 @@ Ivy/
 ├── eval/                   # evaluation harness and test sets
 ├── reports/                # evaluation results
 ├── scripts/                # data download, generation and preprocessing
-├── docs/                   # report.pdf, screenshots, frontend review
+├── docs/                   # report.pdf, screenshots
 ├── DESIGN.md               # design system
 └── requirements.txt
 ```
