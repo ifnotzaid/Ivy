@@ -29,6 +29,7 @@ check this/
 mt5-style-translator-final/
 
 # Generated/local outputs
+data/raw/failed_topics_*.txt
 outputs/
 /checkpoint-report.txt
 /zip-report.txt
