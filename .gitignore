@@ -1,4 +1,7 @@
-# Data (too large for git)
+# Secrets (copy .env.example to .env)
+.env
+
+# Raw and processed data (too large for git); the classifier set is kept on purpose
 data/raw/*.csv
 data/raw/*.jsonl
 data/raw/**/*.csv
@@ -16,20 +19,25 @@ data/*.db.*
 data/*.sqlite
 data/*.sqlite3
 
-# Model checkpoints
+# Model weights and downloads (large, never commit)
 models/
 *.pt
 *.bin
 *.safetensors
+*.zip
+check this/
+mt5-style-translator-final/
 
 # Generated/local outputs
 outputs/
+/checkpoint-report.txt
+/zip-report.txt
 
 # Python
 __pycache__/
 *.pyc
-.env
 venv/
+.venv/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -38,5 +46,5 @@ venv/
 .DS_Store
 Thumbs.db
 
-# API keys
-.env
+# Taste skill working files
+.taste-skill/

@@ -9,8 +9,10 @@ import json
 import re
 import time
 
+import gemini
+
 analysis_cache = {}
-MAX_ANALYSIS_ATTEMPTS = 5
+MAX_ANALYSIS_ATTEMPTS = 2  # each attempt is one Gemini request; the free tier is small
 MAX_OTHER_RATIO = 0.12
 VALID_POS = {
     "noun", "verb", "adj", "adv", "prep", "conj",
@@ -130,8 +132,6 @@ Respond with ONLY the JSON array. No markdown fences, no explanation."""
     last_cleaned = None
     for attempt in range(MAX_ANALYSIS_ATTEMPTS):
         try:
-            from google.genai import types
-
             retry_instruction = ""
             if attempt > 0:
                 retry_instruction = f"""
@@ -142,17 +142,7 @@ Return a meaning and CEFR difficulty for every lexical word.
 For Turkish especially: proper names are noun, finite verbs are verb, and frequency words like "genellikle" are adv.
 Attempt {attempt + 1} of {MAX_ANALYSIS_ATTEMPTS}."""
 
-            response = gemini_client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt_base + retry_instruction,
-                config=types.GenerateContentConfig(
-                    temperature=0.1,
-                    max_output_tokens=2048,
-                    thinking_config=types.ThinkingConfig(thinking_budget=0),
-                ),
-            )
-
-            text = (response.text or "").strip()
+            text = gemini.generate(prompt_base + retry_instruction, temperature=0.1, max_tokens=2048)
             if text.startswith("```"):
                 text = re.sub(r"^```(?:json)?\s*", "", text)
                 text = re.sub(r"\s*```$", "", text)
@@ -192,7 +182,9 @@ Attempt {attempt + 1} of {MAX_ANALYSIS_ATTEMPTS}."""
         except json.JSONDecodeError as exc:
             print(f"  [WordAnalysis] JSON error attempt {attempt + 1}: {exc}")
         except Exception as exc:
-            print(f"  [WordAnalysis] Error attempt {attempt + 1}: {exc}")
+            print(f"  [WordAnalysis] Error attempt {attempt + 1}: {str(exc)[:200]}")
+            if gemini.is_rate_limited(exc):
+                break
             time.sleep(1)
 
     if last_cleaned:
